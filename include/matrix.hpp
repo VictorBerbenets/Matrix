@@ -3,6 +3,7 @@
 
 #include <istream>
 #include <stdexcept>
+#include <utility>
 
 namespace yLAB {
 
@@ -20,6 +21,9 @@ public:
 template<typename Iter>
     Matrix(Iter begin, Iter end)
     : data_ { new T[N*N] } {
+        if (std::distance(begin, end) != N*N) {
+            throw std::invalid_argument{"data size != N * N"};
+        }
         std::copy(begin, end, data_);
     };
 
