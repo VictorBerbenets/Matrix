@@ -35,11 +35,11 @@ template<typename Iter>
         }
     };
 
-    Matrix(const Matrix<T, N>& rhs) {
-        data_ = new T[N*N];
+    Matrix(const Matrix<T, N>& rhs)
+    : data_ { new T[N*N] },
+      column_ { rhs.column_ },
+      line_ { rhs.line_ } {
         std::copy(rhs.data_, rhs.data_ + N, data_);
-        column_ = rhs.column_;
-        line_   = rhs.line_;
     };
 
     Matrix(Matrix<T, N>&& rhs)
