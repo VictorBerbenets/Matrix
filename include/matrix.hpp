@@ -8,6 +8,7 @@ namespace yLAB {
 
 template<typename T, std::size_t N>
 class Matrix final {
+public:
     using size_type        = std::size_t;
     using value_type       = T;
     using pointer          = T*;
@@ -15,13 +16,11 @@ class Matrix final {
     using const_value_type = const value_type;
     using const_pointer    = const pointer;
     using const_reference  = const reference;
-public:
+/*----------------------------------------------------------------------------*/
 template<typename Iter>
     Matrix(Iter begin, Iter end)
     : data_ { new T[N*N] } {
-        //std::cout << "BEFORE COPY\n";
         std::copy(begin, end, data_);
-        //std::cout << "AFTER  COPY\n";
     };
 
     Matrix(std::istream& is)
@@ -34,7 +33,6 @@ template<typename Iter>
             }
             *(data_ + count) = tmp;
         }
-
     };
 
     Matrix(const Matrix<T, N>& rhs) {
@@ -78,7 +76,7 @@ template<typename Iter>
         std::swap(lhs.column_, rhs.column_);
         std::swap(lhs.line_, rhs.line_);
     };
-
+/*----------------------------------------------------------------------------*/
 private:
     pointer data_;
     size_type column_ {0};
