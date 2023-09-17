@@ -39,9 +39,7 @@ template<typename Iter>
 
     Matrix(const Matrix<T, N>& rhs) {
         data_ = new T[N*N];
-        std::cout << "BEFORE COPY\n";
         std::copy(rhs.data_, rhs.data_ + N, data_);
-        std::cout << "AFTER  COPY\n";
         column_ = rhs.column_;
         line_   = rhs.line_;
     };
@@ -55,10 +53,7 @@ template<typename Iter>
     };
     
     Matrix<T, N>& operator=(const Matrix<T, N>& rhs) {
-        //delete[] data_;
-        std::cout << "BEING\n";
         Matrix<T, N> tmp = rhs;
-        std::cout << "END\n";
         Swap(tmp, *this);
 
         return *this;
