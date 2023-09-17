@@ -7,7 +7,7 @@
 
 namespace yLAB {
 
-template<typename T, std::size_t N>
+template<typename T>
 class Matrix final {
 public:
     using size_type        = std::size_t;
@@ -19,17 +19,23 @@ public:
     using const_reference  = const reference;
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
-    Matrix(Iter begin, Iter end)
-    : data_ { new T[N*N] } {
-        if (std::distance(begin, end) != N*N) {
-            throw std::invalid_argument{"data size != N * N"};
+    Matrix(size_type n_column, size_type n_line, Iter begin, Iter end)
+    : n_column_ {n_column},
+      n_line_ {n_line},
+      capacity_ {n_line * n_column},
+      data_ {new T[capacity_]} {
+        if (static_cast<size_type>(std::distance(begin, end)) != capacity_) {
+            throw std::invalid_argument{"data size != matrix's size"};
         }
         std::copy(begin, end, data_);
     };
 
-    Matrix(std::istream& is)
-    : data_ { new T[N*N] } {
-        for (size_type count = 0; count < N * N; ++count) {
+    Matrix(size_type n_column, size_type n_line, std::istream& is)
+    : n_column_ {n_column},
+      n_line_ {n_line},
+      capacity_ {n_line * n_column},
+      data_ {new T[capacity_]} {
+        for (size_type count = 0; count < capacity_; ++count) {
             T tmp {};
             is >> tmp;
             if (!is.good()) {
@@ -39,34 +45,39 @@ template<typename Iter>
         }
     };
 
-    Matrix(const Matrix<T, N>& rhs)
-    : data_ { new T[N*N] },
-      column_ { rhs.column_ },
-      line_ { rhs.line_ } {
-        std::copy(rhs.data_, rhs.data_ + N, data_);
+    Matrix(const Matrix<T>& rhs)
+    : n_column_ {rhs.n_column_},
+      n_line_ {rhs.n_line_},
+      capacity_ {rhs.capacity_},
+      data_ {new T[n_line_ * n_column_]} {
+        std::copy(rhs.data_, rhs.data_ + capacity_, data_);
     };
 
-    Matrix(Matrix<T, N>&& rhs)
+    Matrix(Matrix<T>&& rhs)
     : data_   { std::move(rhs.data_) },
-      column_ { rhs.column_ },
-      line_   { rhs.line_ } {
-        rhs.column_ = 0;  
-        rhs.line_   = 0;  
+      n_column_ { rhs.n_column_ },
+      capacity_ {rhs.capacity_},
+      n_line_   { rhs.n_line_ } {
+        rhs.n_column_ = 0;  
+        rhs.n_line_   = 0;  
+        rhs.capacity_ = 0;
     };
     
-    Matrix<T, N>& operator=(const Matrix<T, N>& rhs) {
-        Matrix<T, N> tmp = rhs;
+    Matrix<T>& operator=(const Matrix<T>& rhs) {
+        Matrix<T> tmp = rhs;
         Swap(tmp, *this);
 
         return *this;
     };
 
-    Matrix<T, N>& operator=(Matrix<T, N>&& rhs) {
-        data_   = std::move(rhs.data_);
-        column_ = rhs.column_;
-        line_   = rhs.line_;
-        rhs.column_ = 0;
-        rhs.line_   = 0;
+    Matrix<T>& operator=(Matrix<T>&& rhs) {
+        data_     = std::move(rhs.data_);
+        n_column_ = rhs.n_column_;
+        n_line_   = rhs.n_line_;
+        capacity_ = rhs.
+        rhs.n_column_ = 0;
+        rhs.n_line_   = 0;
+        rhs.capacity_ = 0;
 
         return *this;
     };
@@ -75,16 +86,18 @@ template<typename Iter>
         delete[] data_;
     };
 
-    void Swap(Matrix<T, N>& lhs, Matrix<T, N> rhs) {
+    void Swap(Matrix<T>& lhs, Matrix<T> rhs) {
         std::swap(lhs.data_, rhs.data_);
-        std::swap(lhs.column_, rhs.column_);
-        std::swap(lhs.line_, rhs.line_);
+        std::swap(lhs.n_column_, rhs.n_column_);
+        std::swap(lhs.n_line_, rhs.n_line_);
+        std::swap(lhs.capacity_, rhs.capacity_);
     };
 /*----------------------------------------------------------------------------*/
 private:
+    size_type n_column_;
+    size_type n_line_;
+    size_type capacity_;
     pointer data_;
-    size_type column_ {0};
-    size_type line_ {0};
 }; // <--- class Matrix
 
 } // <--- namespace yLAB
