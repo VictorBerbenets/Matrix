@@ -4,6 +4,7 @@
 #include <istream>
 #include <stdexcept>
 #include <utility>
+#include <algorithm>
 
 namespace yLAB {
 
@@ -44,12 +45,20 @@ template<typename Iter>
             *(data_ + count) = tmp;
         }
     };
+    
+    Matrix(size_type n_column, size_type n_line, const T& aggregator = {})
+    : n_column_ {n_column},
+      n_line_ {n_line},
+      capacity_ {n_line * n_column_},
+      data_ {new T[capacity_]} {
+        std::fill(data_, data_ + capacity_, aggregator);
+      }
 
     Matrix(const Matrix<T>& rhs)
     : n_column_ {rhs.n_column_},
       n_line_ {rhs.n_line_},
       capacity_ {rhs.capacity_},
-      data_ {new T[n_line_ * n_column_]} {
+      data_ {new T[capacity_]} {
         std::copy(rhs.data_, rhs.data_ + capacity_, data_);
     };
 
