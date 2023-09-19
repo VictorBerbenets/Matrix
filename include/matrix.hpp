@@ -63,10 +63,10 @@ template<typename Iter>
     };
 
     Matrix(Matrix<T>&& rhs)
-    : data_     {std::exchange(rhs.data_, nullptr)},
-      n_column_ {rhs.n_column_, 0},
-      capacity_ {rhs.capacity_, 0},
-      n_line_   {rhs.n_line_, 0}   {};
+    : data_     { std::exchange(rhs.data_, nullptr) },
+      n_column_ { std::exchange(rhs.n_column_, 0) },
+      capacity_ { std::exchange(rhs.capacity_, 0) },
+      n_line_   { std::exchange(rhs.n_line_, 0) }   {};
     
     Matrix<T>& operator=(const Matrix<T>& rhs) {
         Matrix<T> tmp = rhs;
