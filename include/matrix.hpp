@@ -42,7 +42,7 @@ template<typename Iter>
             if (!is.good()) {
                 throw std::runtime_error{"data reading error"};
             }
-            *(data_ + count) = tmp;
+            data_[count] = tmp;
         }
     };
     
@@ -52,7 +52,7 @@ template<typename Iter>
       capacity_ {n_line * n_column_},
       data_ {new T[capacity_]} {
         std::fill(data_, data_ + capacity_, aggregator);
-      }
+    };
 
     Matrix(const Matrix<T>& rhs)
     : n_column_ {rhs.n_column_},
@@ -63,30 +63,25 @@ template<typename Iter>
     };
 
     Matrix(Matrix<T>&& rhs)
-    : data_   { std::move(rhs.data_) },
-      n_column_ { rhs.n_column_ },
-      capacity_ {rhs.capacity_},
-      n_line_   { rhs.n_line_ } {
-        rhs.n_column_ = 0;  
-        rhs.n_line_   = 0;  
-        rhs.capacity_ = 0;
-    };
+    : data_     {std::exchange(rhs.data_, nullptr)},
+      n_column_ {rhs.n_column_, 0},
+      capacity_ {rhs.capacity_, 0},
+      n_line_   {rhs.n_line_, 0}   {};
     
     Matrix<T>& operator=(const Matrix<T>& rhs) {
         Matrix<T> tmp = rhs;
-        Swap(tmp, *this);
+        swap(tmp);
 
         return *this;
     };
 
     Matrix<T>& operator=(Matrix<T>&& rhs) {
-        data_     = std::move(rhs.data_);
-        n_column_ = rhs.n_column_;
-        n_line_   = rhs.n_line_;
-        capacity_ = rhs.
-        rhs.n_column_ = 0;
-        rhs.n_line_   = 0;
-        rhs.capacity_ = 0;
+        delete[] data_;
+
+        data_     = std::exchange(rhs.data_, nullptr);
+        n_column_ = std::exchange(rhs.n_column_, 0);
+        capacity_ = std::exchange(rhs.capacity_, 0);
+        n_line_   = std::exchange(rhs.n_line_, 0);
 
         return *this;
     };
@@ -94,12 +89,23 @@ template<typename Iter>
     ~Matrix() {
         delete[] data_;
     };
+    
+   // ProxyBracket operator[](size_type index1) const
 
-    void Swap(Matrix<T>& lhs, Matrix<T> rhs) {
-        std::swap(lhs.data_, rhs.data_);
-        std::swap(lhs.n_column_, rhs.n_column_);
-        std::swap(lhs.n_line_, rhs.n_line_);
-        std::swap(lhs.capacity_, rhs.capacity_);
+    T determinant() const {
+        if (n_column_ != n_line_) {
+           // throw MyExcepClass; // haven't written yet
+        }
+
+
+    };
+
+private:
+    void swap(Matrix<T>& rhs) {
+        std::swap(data_, rhs.data_);
+        std::swap(n_column_, rhs.n_column_);
+        std::swap(n_line_, rhs.n_line_);
+        std::swap(capacity_, rhs.capacity_);
     };
 /*----------------------------------------------------------------------------*/
 private:
@@ -107,6 +113,17 @@ private:
     size_type n_line_;
     size_type capacity_;
     pointer data_;
+#if 0
+    struct ProxyBracket {
+        T& operator[](size_type index2) {
+            return ...;
+        };
+
+        const T& operator[](size_type index2) const {
+            return ...;
+        }
+    };
+#endif
 }; // <--- class Matrix
 
 } // <--- namespace yLAB
