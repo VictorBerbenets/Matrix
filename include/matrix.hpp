@@ -11,16 +11,17 @@
 
 namespace yLAB {
 
-namespace my_concepts {
+//namespace my_concepts {
 
 template<typename T>
 concept numeric_type = requires(T item) {
     item + item; item - item; item * item; item / item;
 };
 
-} // <--- namespace my_concepts
+//} // <--- namespace my_concepts
 
-template<my_concepts::numeric_type T>
+//template<my_concepts::numeric_type T>
+template<numeric_type T>
 class Matrix final {
     struct ProxyBracket;
 public:
@@ -30,7 +31,7 @@ public:
     using reference        = T&;
     using const_value_type = const value_type;
     using const_pointer    = T const *;
-    using const_reference  = const reference;
+    using const_reference  = const T&;
     using matrix_size      = std::pair<size_type, size_type>;
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
@@ -104,11 +105,11 @@ template<typename Iter>
         delete[] data_;
     };
     
-    /*ProxyBracket operator[](size_type index1) {
+    ProxyBracket operator[](size_type index1) {
         return ProxyBracket(data_ + n_column_ * index1);
-    }*/
+    }
     
-    ProxyBracket operator[](size_type index1) const {
+    const ProxyBracket operator[](size_type index1) const {
         return ProxyBracket(data_ + n_column_ * index1);
     }
 
