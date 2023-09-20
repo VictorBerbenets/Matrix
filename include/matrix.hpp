@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <utility>
 #include <algorithm>
+#include <concepts>
+#include <type_traits>
 
 namespace yLAB {
 
@@ -104,6 +106,15 @@ template<typename Iter>
 
 
     };
+
+    T calculate_determinant() const requires(std::is_floating_point_v<T>) {
+    // here will Gauss algorithm 
+    }
+    
+    
+    T calculate_determinant() const requires(std::is_integral_v<T>) {
+    // here will be algrithm for integral values
+    }
 
 private:
     void swap(Matrix<T>& rhs) {
