@@ -9,6 +9,11 @@
 namespace yLAB {
 
 template<typename T>
+concept numeric_type = requires(T item) {
+    item + item; item - item; item * item; item / item;
+};
+
+template<numeric_type T>
 class Matrix final {
 public:
     using size_type        = std::size_t;
