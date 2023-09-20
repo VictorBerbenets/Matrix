@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <concepts>
 #include <type_traits>
+#include <utility>
 
 namespace yLAB {
 
@@ -21,14 +22,16 @@ concept numeric_type = requires(T item) {
 
 template<my_concepts::numeric_type T>
 class Matrix final {
+    struct ProxyBracket;
 public:
     using size_type        = std::size_t;
     using value_type       = T;
     using pointer          = T*;
     using reference        = T&;
     using const_value_type = const value_type;
-    using const_pointer    = const pointer;
+    using const_pointer    = T const *;
     using const_reference  = const reference;
+    using matrix_size      = std::pair<size_type, size_type>;
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
     Matrix(size_type n_column, size_type n_line, Iter begin, Iter end)
@@ -65,7 +68,7 @@ template<typename Iter>
         std::fill(data_, data_ + capacity_, aggregator);
     };
 
-    Matrix(const Matrix<T>& rhs)
+    Matrix(const Matrix& rhs)
     : n_column_ {rhs.n_column_},
       n_line_ {rhs.n_line_},
       capacity_ {rhs.capacity_},
@@ -73,20 +76,20 @@ template<typename Iter>
         std::copy(rhs.data_, rhs.data_ + capacity_, data_);
     };
 
-    Matrix(Matrix<T>&& rhs)
+    Matrix(Matrix&& rhs)
     : data_     { std::exchange(rhs.data_, nullptr) },
       n_column_ { std::exchange(rhs.n_column_, 0) },
       capacity_ { std::exchange(rhs.capacity_, 0) },
       n_line_   { std::exchange(rhs.n_line_, 0) }   {};
     
-    Matrix<T>& operator=(const Matrix<T>& rhs) {
+    Matrix& operator=(const Matrix& rhs) {
         Matrix<T> tmp = rhs;
         swap(tmp);
 
         return *this;
     };
 
-    Matrix<T>& operator=(Matrix<T>&& rhs) {
+    Matrix& operator=(Matrix&& rhs) {
         delete[] data_;
 
         data_     = std::exchange(rhs.data_, nullptr);
@@ -101,25 +104,33 @@ template<typename Iter>
         delete[] data_;
     };
     
-   // ProxyBracket operator[](size_type index1) const
+    /*ProxyBracket operator[](size_type index1) {
+        return ProxyBracket(data_ + n_column_ * index1);
+    }*/
+    
+    ProxyBracket operator[](size_type index1) const {
+        return ProxyBracket(data_ + n_column_ * index1);
+    }
 
     T determinant() const {
-        if (n_column_ != n_line_) {
+        if (!is_square()) {
            // throw MyExcepClass; // haven't written yet
         }
         return calculate_determinant();
 
     };
-
+    // Gauss Algorithm
     T calculate_determinant() const requires(std::is_floating_point_v<T>) {
-    // here will Gauss algorithm
+        
     }
     
     
     T calculate_determinant() const requires(std::is_integral_v<T>) {
     // here will be algrithm for integral values
     }
-
+    
+    bool is_square() const noexcept { return n_line_ == n_column_; };
+    matrix_size get_size() const noexcept { return {n_line_, n_column_}; };
 private:
     void swap(Matrix<T>& rhs) {
         std::swap(data_, rhs.data_);
@@ -133,18 +144,37 @@ private:
     size_type n_line_;
     size_type capacity_;
     pointer data_;
-#if 0
+
     struct ProxyBracket {
-        T& operator[](size_type index2) {
-            return ...;
+        ProxyBracket(pointer ptr)
+            : line_ptr_ {ptr} {};
+
+        reference operator[](size_type index2) {
+            return line_ptr_[index2];
         };
 
-        const T& operator[](size_type index2) const {
-            return ...;
+        const_reference operator[](size_type index2) const {
+            return line_ptr_[index2];
         }
+        /*-------------------------------------------------*/    
+        pointer line_ptr_;
     };
-#endif
+
 }; // <--- class Matrix
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
+    using size_type = Matrix<T>::size_type;
+
+    auto [n_line, n_column] = matrix.get_size();
+    for (size_type index1 = 0; index1 < n_line; ++index1) {
+        for (size_type index2 = 0; index2 < n_column; ++index2) {
+            os << matrix[index1][index2] << ' ';
+        }
+        os << std::endl;
+    }
+    return os;
+}
 
 } // <--- namespace yLAB
 
