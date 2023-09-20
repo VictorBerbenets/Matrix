@@ -11,17 +11,17 @@
 
 namespace yLAB {
 
-//namespace my_concepts {
+namespace my_concepts {
 
 template<typename T>
 concept numeric_type = requires(T item) {
     item + item; item - item; item * item; item / item;
 };
 
-//} // <--- namespace my_concepts
+} // <--- namespace my_concepts
 
 //template<my_concepts::numeric_type T>
-template<numeric_type T>
+template<my_concepts::numeric_type T>
 class Matrix final {
     struct ProxyBracket;
 public:
@@ -104,11 +104,11 @@ template<typename Iter>
     ~Matrix() {
         delete[] data_;
     };
-    
+
     ProxyBracket operator[](size_type index1) {
         return ProxyBracket(data_ + n_column_ * index1);
     }
-    
+
     const ProxyBracket operator[](size_type index1) const {
         return ProxyBracket(data_ + n_column_ * index1);
     }
@@ -122,7 +122,15 @@ template<typename Iter>
     };
     // Gauss Algorithm
     T calculate_determinant() const requires(std::is_floating_point_v<T>) {
-        
+        auto matrix = *this;
+#if 0 
+        for (size_type id1 = 0; id1 < (n_line_ - 1); ++id1) {
+            auto div = matrix[id1][id1];
+            for (size_type id2 = 0; id2 < n_column_; ++id2) {
+                matrix[id1][id2] /= 
+            }
+        }
+#endif
     }
     
     
