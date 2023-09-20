@@ -10,12 +10,16 @@
 
 namespace yLAB {
 
+namespace my_concepts {
+
 template<typename T>
 concept numeric_type = requires(T item) {
     item + item; item - item; item * item; item / item;
 };
 
-template<numeric_type T>
+} // <--- namespace my_concepts
+
+template<my_concepts::numeric_type T>
 class Matrix final {
 public:
     using size_type        = std::size_t;
@@ -103,12 +107,12 @@ template<typename Iter>
         if (n_column_ != n_line_) {
            // throw MyExcepClass; // haven't written yet
         }
-
+        return calculate_determinant();
 
     };
 
     T calculate_determinant() const requires(std::is_floating_point_v<T>) {
-    // here will Gauss algorithm 
+    // here will Gauss algorithm
     }
     
     
