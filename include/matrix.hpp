@@ -32,12 +32,12 @@ public:
     using pointer          = T*;
     using reference        = T&;
     using const_value_type = const value_type;
-    using const_pointer    = T const *;
+    using const_pointer    = T* const;
     using const_reference  = const T&;
     using matrix_size      = std::pair<size_type, size_type>;
 
-    using iterator       = MatrixIterator<T>;
-    using const_iterator = MatrixIterator<const T>;
+    using iterator       = typename iterator::MatrixIterator<T>;
+    using const_iterator = const typename iterator::MatrixIterator<T>;
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
     Matrix(size_type n_column, size_type n_line, Iter begin, Iter end)
@@ -49,7 +49,7 @@ template<typename Iter>
             throw std::invalid_argument{"data size != matrix's size"};
         }
         std::copy(begin, end, data_);
-    };
+    }
 
     Matrix(size_type n_column, size_type n_line, std::istream& is)
     : n_column_ {n_column},
@@ -64,7 +64,7 @@ template<typename Iter>
             }
             data_[count] = tmp;
         }
-    };
+    }
     
     Matrix(size_type n_column, size_type n_line, const T& aggregator = {})
     : n_column_ {n_column},
@@ -72,7 +72,7 @@ template<typename Iter>
       capacity_ {n_line * n_column_},
       data_ {new T[capacity_]} {
         std::fill(data_, data_ + capacity_, aggregator);
-    };
+    }
 
     Matrix(const Matrix& rhs)
     : n_column_ {rhs.n_column_},
@@ -80,7 +80,7 @@ template<typename Iter>
       capacity_ {rhs.capacity_},
       data_ {new T[capacity_]} {
         std::copy(rhs.data_, rhs.data_ + capacity_, data_);
-    };
+    }
 
     Matrix(Matrix&& rhs)
     : data_     { std::exchange(rhs.data_, nullptr) },
@@ -93,7 +93,7 @@ template<typename Iter>
         swap(tmp);
 
         return *this;
-    };
+    }
 
     Matrix& operator=(Matrix&& rhs) {
         delete[] data_;
@@ -104,11 +104,11 @@ template<typename Iter>
         n_line_   = std::exchange(rhs.n_line_, 0);
 
         return *this;
-    };
+    }
 
     ~Matrix() {
         delete[] data_;
-    };
+    }
 
     ProxyBracket operator[](size_type index1) {
         return ProxyBracket(data_ + n_column_ * index1);
@@ -124,7 +124,7 @@ template<typename Iter>
         }
         return calculate_determinant();
 
-    };
+    }
     // Gauss Algorithm
     T calculate_determinant() const requires(std::is_floating_point_v<T>) {
         auto matrix = *this;
@@ -143,15 +143,20 @@ template<typename Iter>
     // here will be algrithm for integral values
     }
     
-    bool is_square() const noexcept { return n_line_ == n_column_; };
-    matrix_size get_size() const noexcept { return {n_line_, n_column_}; };
+    bool is_square() const noexcept { return n_line_ == n_column_; }
+    matrix_size get_size() const noexcept { return {n_line_, n_column_}; }
+
+    iterator begin() { return iterator{data_}; }
+    iterator end()   { return iterator{data_ + capacity_}; }
+    const_iterator cbegin() const { return iterator{data_}; }
+    const_iterator cend()   const { return iterator{data_ + capacity_}; }
 private:
     void swap(Matrix<T>& rhs) {
-        std::swap(data_, rhs.data_);
+        std::swap(data_, rhs.datlhs.get_size() != rhs.get_size());
         std::swap(n_column_, rhs.n_column_);
         std::swap(n_line_, rhs.n_line_);
         std::swap(capacity_, rhs.capacity_);
-    };
+    }
 /*----------------------------------------------------------------------------*/
 private:
     size_type n_column_;
@@ -161,11 +166,11 @@ private:
 
     struct ProxyBracket {
         ProxyBracket(pointer ptr)
-            : line_ptr_ {ptr} {};
+            : line_ptr_ {ptr} {}
 
         reference operator[](size_type index2) {
             return line_ptr_[index2];
-        };
+        }
 
         const_reference operator[](size_type index2) const {
             return line_ptr_[index2];
@@ -192,10 +197,8 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
 
 template<typename T>
 bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
-    if (lhs.get_size() != rhs.get_size()) {
-        return false;
-    }
-//    return std::equal
+    return lhs.get_size() == rhs.get_size() &&
+           std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 } // <--- namespace yLAB
