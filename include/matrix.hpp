@@ -26,6 +26,8 @@ concept numeric_type = requires(T item) {
 template<my_concepts::numeric_type T>
 class Matrix final {
     struct ProxyBracket;
+
+    enum class IsZero: char { Zero = 0, nZero = 1 };
 public:
     using size_type        = std::size_t;
     using value_type       = T;
@@ -39,7 +41,7 @@ public:
     using const_iterator = const typename iterator::MatrixIterator<T>;
 
     using matrix_size = std::pair<size_type, size_type>;
-    using line_info   = std::pair<const_iterator, size_type>;      
+    using line_info   = std::pair<IsZero, size_type>;      
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
     Matrix(size_type n_column, size_type n_line, Iter begin, Iter end)
@@ -140,9 +142,10 @@ template<typename Iter>
     const_iterator cend()   const { return iterator{data_ + capacity_}; }
 
     void swap_lines(size_type id1, size_type id2) {
-       for (size_type counter = 0; counter < n_column_; ++counter) {
-            std::swap((*this)[id1][counter], (*this)[id2][counter]);
-       }
+        static auto& matrix = *this;
+        for (size_type counter = 0; counter < n_column_; ++counter) {
+            std::swap(matrix[id1][counter], matrix[id2][counter]);
+        }
     }
 
 private:
@@ -154,14 +157,19 @@ private:
     }
 
     line_info find_nzero_column_elem(size_type start_line, size_type column) const {
-        auto offset = start_line * n_column_;
-        for (auto iter = cbegin() + offset; iter != cend(); ++iter) {
-            if (!cmp::is_zero((*this)[*iter][column])) { return {iter, *iter}; }
+        static auto& matrix = *this;
+        for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
+            if (!cmp::is_zero(matrix[start_id][column])) { return {IsZero::nZero, start_id}; }
         }
-        return {cend(), 0};
+        return {IsZero::Zero, 0};
     }
 
-    void divide_string();
+    void subtract_lines(size_type line1_id, size_type line2_id, value_type coeff) {
+        static auto& matrix = *this;
+        for (size_type index = line2_id; index < n_column_; ++index) {
+           matrix[line1_id][index] -= matrix[line2_id][index] * coeff; 
+        }
+    }
 /*----------------------------------------------------------------------------*/
 private:
     size_type n_column_;
@@ -180,7 +188,7 @@ private:
         const_reference operator[](size_type index2) const {
             return line_ptr_[index2];
         }
-        /*-------------------------------------------------*/    
+        /*-------------------------------------------------*/
         pointer line_ptr_;
     };
 
@@ -195,16 +203,21 @@ bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
 template<typename T>
 T Matrix<T>::calculate_determinant() const requires(std::is_floating_point_v<T>) {
     auto matrix = *this;
-    T determ_val = 0;
-    for (size_type id1 = 0; id1 < (n_line_ - 1); ++id1) {
-        auto line_inf = find_nzero_column_elem(id1, id1);
-        if (line_inf.first = cend()) { return 0; }
-        if (line_inf.second != id1)  { swap_lines(line_inf.second, id1); }
-        auto divider = line_inf.second;
-        for (size_type id2 = 0; id2 < n_column_; ++id2) {
-           // matrix[id1][id2] /= 
+    T determ_val = 1.0;
+    size_type id1 = 0;
+    for ( ; id1 < (n_line_ - 1); ++id1) {
+        auto line_inf = matrix.find_nzero_column_elem(id1, id1);
+        if (line_inf.first == IsZero::Zero) { return 0; }
+        if (line_inf.second != id1)  { matrix.swap_lines(line_inf.second, id1); }
+        determ_val *= matrix[id1][id1];
+        for (auto substract_id = id1 + 1; substract_id < n_line_; ++substract_id) {
+            if ( !cmp::is_zero(matrix[id1][substract_id]) ) {
+                auto coeff = matrix[substract_id][id1] / matrix[id1][id1];
+                matrix.subtract_lines(substract_id, id1, coeff);
+            }
         }
     }
+    return determ_val *= matrix[id1][id1];
 }
 
 template<typename T>
