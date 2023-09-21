@@ -34,10 +34,12 @@ public:
     using const_value_type = const value_type;
     using const_pointer    = T* const;
     using const_reference  = const T&;
-    using matrix_size      = std::pair<size_type, size_type>;
 
     using iterator       = typename iterator::MatrixIterator<T>;
     using const_iterator = const typename iterator::MatrixIterator<T>;
+
+    using matrix_size = std::pair<size_type, size_type>;
+    using line_info   = std::pair<const_iterator, size_type>;      
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
     Matrix(size_type n_column, size_type n_line, Iter begin, Iter end)
@@ -125,24 +127,10 @@ template<typename Iter>
         return calculate_determinant();
 
     }
-    // Gauss Algorithm
-    T calculate_determinant() const requires(std::is_floating_point_v<T>) {
-        auto matrix = *this;
-#if 0 
-        for (size_type id1 = 0; id1 < (n_line_ - 1); ++id1) {
-            auto div = matrix[id1][id1];
-            for (size_type id2 = 0; id2 < n_column_; ++id2) {
-                matrix[id1][id2] /= 
-            }
-        }
-#endif
-    }
-    
-    
-    T calculate_determinant() const requires(std::is_integral_v<T>) {
-    // here will be algrithm for integral values
-    }
-    
+
+    T calculate_determinant() const requires(std::is_floating_point_v<T>); /* Gauss algorithm */
+    T calculate_determinant() const requires(std::is_integral_v<T>);
+
     bool is_square() const noexcept { return n_line_ == n_column_; }
     matrix_size get_size() const noexcept { return {n_line_, n_column_}; }
 
@@ -150,6 +138,13 @@ template<typename Iter>
     iterator end()   { return iterator{data_ + capacity_}; }
     const_iterator cbegin() const { return iterator{data_}; }
     const_iterator cend()   const { return iterator{data_ + capacity_}; }
+
+    void swap_lines(size_type id1, size_type id2) {
+       for (size_type counter = 0; counter < n_column_; ++counter) {
+            std::swap((*this)[id1][counter], (*this)[id2][counter]);
+       }
+    }
+
 private:
     void swap(Matrix<T>& rhs) {
         std::swap(data_, rhs.datlhs.get_size() != rhs.get_size());
@@ -157,6 +152,16 @@ private:
         std::swap(n_line_, rhs.n_line_);
         std::swap(capacity_, rhs.capacity_);
     }
+
+    line_info find_nzero_column_elem(size_type start_line, size_type column) const {
+        auto offset = start_line * n_column_;
+        for (auto iter = cbegin() + offset; iter != cend(); ++iter) {
+            if (!cmp::is_zero((*this)[*iter][column])) { return {iter, *iter}; }
+        }
+        return {cend(), 0};
+    }
+
+    void divide_string();
 /*----------------------------------------------------------------------------*/
 private:
     size_type n_column_;
@@ -182,6 +187,32 @@ private:
 }; // <--- class Matrix
 
 template<typename T>
+bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    return lhs.get_size() == rhs.get_size() &&
+           std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+}
+
+template<typename T>
+T Matrix<T>::calculate_determinant() const requires(std::is_floating_point_v<T>) {
+    auto matrix = *this;
+    T determ_val = 0;
+    for (size_type id1 = 0; id1 < (n_line_ - 1); ++id1) {
+        auto line_inf = find_nzero_column_elem(id1, id1);
+        if (line_inf.first = cend()) { return 0; }
+        if (line_inf.second != id1)  { swap_lines(line_inf.second, id1); }
+        auto divider = line_inf.second;
+        for (size_type id2 = 0; id2 < n_column_; ++id2) {
+           // matrix[id1][id2] /= 
+        }
+    }
+}
+
+template<typename T>
+T Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) {
+
+}
+
+template<typename T>
 std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
     using size_type = Matrix<T>::size_type;
 
@@ -193,12 +224,6 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
         os << std::endl;
     }
     return os;
-}
-
-template<typename T>
-bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
-    return lhs.get_size() == rhs.get_size() &&
-           std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 } // <--- namespace yLAB
