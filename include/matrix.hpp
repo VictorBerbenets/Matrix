@@ -177,7 +177,8 @@ private:
     size_type capacity_;
     pointer data_;
 
-    struct ProxyBracket {
+    class ProxyBracket {
+    public:
         ProxyBracket(pointer ptr)
             : line_ptr_ {ptr} {}
 
@@ -188,7 +189,7 @@ private:
         const_reference operator[](size_type index2) const {
             return line_ptr_[index2];
         }
-        /*-------------------------------------------------*/
+    private:
         pointer line_ptr_;
     };
 
