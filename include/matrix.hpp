@@ -9,6 +9,9 @@
 #include <type_traits>
 #include <utility>
 
+#include "double_comparison.hpp"
+#include "matrix_iterator.hpp"
+
 namespace yLAB {
 
 namespace my_concepts {
@@ -20,7 +23,6 @@ concept numeric_type = requires(T item) {
 
 } // <--- namespace my_concepts
 
-//template<my_concepts::numeric_type T>
 template<my_concepts::numeric_type T>
 class Matrix final {
     struct ProxyBracket;
@@ -33,6 +35,9 @@ public:
     using const_pointer    = T const *;
     using const_reference  = const T&;
     using matrix_size      = std::pair<size_type, size_type>;
+
+    using iterator       = MatrixIterator<T>;
+    using const_iterator = MatrixIterator<const T>;
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
     Matrix(size_type n_column, size_type n_line, Iter begin, Iter end)
@@ -183,6 +188,14 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
         os << std::endl;
     }
     return os;
+}
+
+template<typename T>
+bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    if (lhs.get_size() != rhs.get_size()) {
+        return false;
+    }
+//    return std::equal
 }
 
 } // <--- namespace yLAB
