@@ -12,7 +12,7 @@ public:
     using reference         = T&;
     using const_pointer     = const T* const;
     using const_reference   = const T&;
-    using difference_type   = std::size_t;
+    using difference_type   = int;
 
     MatrixIterator(pointer ptr = nullptr)
         : ptr_ {ptr} {}
@@ -32,6 +32,9 @@ public:
         ptr_ -= n;
         return *this;
     }
+    
+    MatrixIterator operator+(difference_type n) const noexcept { return {ptr_ + n}; }
+    MatrixIterator operator-(difference_type n) const noexcept { return {ptr_ - n}; }
 
     MatrixIterator operator++(int n) noexcept{ ptr_++; return *this; }
     MatrixIterator operator--(int n) noexcept { ptr_--; return *this; }
@@ -53,14 +56,12 @@ bool operator==(MatrixIterator<T> lhs, MatrixIterator<T> rhs) {
 
 template<typename T>
 MatrixIterator<T> operator+(typename MatrixIterator<T>::difference_type n, MatrixIterator<T> iter) noexcept {
-    auto copy = iter;
-    return copy += n;
+    return iter + n;
 }
 
 template<typename T>
 MatrixIterator<T> operator-(typename MatrixIterator<T>::difference_type n, MatrixIterator<T> iter) noexcept {
-    auto copy = iter;
-    return copy -= n;
+    return iter - n;
 }
 
 template<typename T>

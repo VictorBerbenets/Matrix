@@ -82,7 +82,7 @@ template<typename Iter>
         std::copy(rhs.data_, rhs.data_ + capacity_, data_);
     }
 
-    Matrix(Matrix&& rhs) noexcept
+    Matrix(Matrix&& rhs)
     : data_     { std::exchange(rhs.data_, nullptr) },
       n_column_ { std::exchange(rhs.n_column_, 0) },
       capacity_ { std::exchange(rhs.capacity_, 0) },
@@ -95,7 +95,7 @@ template<typename Iter>
         return *this;
     }
 
-    Matrix& operator=(Matrix&& rhs) noexcept {
+    Matrix& operator=(Matrix&& rhs) {
         delete[] data_;
 
         data_     = std::exchange(rhs.data_, nullptr);
@@ -108,6 +108,30 @@ template<typename Iter>
 
     ~Matrix() {
         delete[] data_;
+    }
+    
+    Matrix& operator+=(const Matrix& rhs) {
+        if (get_size() != rhs.get_size()) {
+//            throw ...;
+        }
+        auto& m = *this;
+        for (size_type id = 0; id < capacity_; ++id) {
+            //m[
+        }
+    }
+
+    Matrix& operator-=(const Matrix& rhs) {
+
+    }
+
+    Matrix& operator*=(value_type coeff) {
+        for (auto& val : *this) {
+            val *= coeff;
+        }
+    }
+
+    Matrix& operator/=(const Matrix& rhs) {
+
     }
 
     ProxyBracket operator[](size_type index1) {
@@ -122,12 +146,12 @@ template<typename Iter>
     matrix_size get_size() const noexcept { return {n_line_, n_column_}; }
 
     void swap_lines(size_type id1, size_type id2) {
-        auto& matrix = *this;
-        for (size_type counter = 0; counter < n_column_; ++counter) {
-            std::swap(matrix[id1][counter], matrix[id2][counter]);
-        }
+        size_type offset1 = id1 * n_column_;
+        size_type offset2 = id2 * n_column_; 
+        std::swap_ranges( begin() + offset1, begin() + (offset1 + n_column_),
+                          begin() + offset2 );
     }
-    
+
     Matrix& negate() & {
         for (auto& val : *this) {
             val *= -1;
@@ -137,10 +161,14 @@ template<typename Iter>
 
     Matrix& transpose() & {
         auto& m = *this;
-        auto copy = m;
-        for (size_type i = 0; i < n_column_; ++i) {
-            for (size_type j = 0; j < n_line_; ++j) {
-                m[i][j] = copy[j][i];
+        Matrix copy = m;
+        std::cout << m << std::endl;
+        std::cout << n_line_ << std::endl;
+        std::cout << n_column_ << std::endl;
+        for (size_type i = 0; i < n_line_; ++i) {
+            for (size_type j = 0; j < n_column_; ++j) {
+                std::cout << "copy = " << copy[i][j] << std::endl;
+                m[j][i] = copy[i][j];
             }
         }
         std::swap(n_line_, n_column_);
