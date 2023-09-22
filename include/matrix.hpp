@@ -130,9 +130,6 @@ template<typename Iter>
 
     }
 
-    T calculate_determinant() const requires(std::is_floating_point_v<T>); /* Gauss algorithm */
-    T calculate_determinant() const requires(std::is_integral_v<T>);
-
     bool is_square() const noexcept { return n_line_ == n_column_; }
     matrix_size get_size() const noexcept { return {n_line_, n_column_}; }
 
@@ -148,6 +145,8 @@ template<typename Iter>
         }
     }
 
+    T calculate_determinant() const; /* Gauss algorithm */
+    T calculate_determinant() const requires(std::is_integral_v<T>); /* Bareiss algorithm */
 private:
     void swap(Matrix<T>& rhs) {
         std::swap(data_, rhs.datlhs.get_size() != rhs.get_size());
@@ -159,7 +158,13 @@ private:
     line_info find_nzero_column_elem(size_type start_line, size_type column) const {
         static auto& matrix = *this;
         for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
-            if (!cmp::is_zero(matrix[start_id][column])) { return {IsZero::nZero, start_id}; }
+            if constexpr (std::is_floating_point_v<T>) {
+                if (!cmp::is_zero(matrix[start_id][column])) {
+                    return {IsZero::nZero, start_id};
+                }
+            } else {
+                if (matrix[start_id][column] != 0) { return {IsZero::nZero, start_id}; }
+            }
         }
         return {IsZero::Zero, 0};
     }
@@ -196,17 +201,11 @@ private:
 }; // <--- class Matrix
 
 template<typename T>
-bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
-    return lhs.get_size() == rhs.get_size() &&
-           std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
-}
-
-template<typename T>
-T Matrix<T>::calculate_determinant() const requires(std::is_floating_point_v<T>) { // Gauss algorithm
+T Matrix<T>::calculate_determinant() const { // Gauss algorithm
     auto matrix = *this;
-    T determ_val = 1.0;
-    size_type has_sign_changed = 0;
-    size_type id1 = 0;
+    value_type determ_val {1.0};
+    bool has_sign_changed {0};
+    size_type id1 {0};
     for ( ; id1 < (n_line_ - 1); ++id1) {
         auto line_inf = matrix.find_nzero_column_elem(id1, id1);
         if (line_inf.first == IsZero::Zero) { return 0; }
@@ -222,13 +221,37 @@ T Matrix<T>::calculate_determinant() const requires(std::is_floating_point_v<T>)
             }
         }
     }
-    if (has_sign_changed) { determ_val *= -1; }
-    return determ_val *= matrix[id1][id1];
+    return determ_val *= matrix[id1][id1] * (has_sign_changed ? -1 : 1);
 }
 
 template<typename T>
-T Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) {
+T Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) { // Bareiss algorithm
+    auto m = *this;
+    bool has_sign_changed {0};
+    value_type divider {1};
+    size_type k {0};
+    for ( ; k < (n_line_ - 1); ++k) {
+        for (size_type i = k + 1; i < n_column_; ++i ) {
+            for (size_type j = k + 1; j < n_column_; ++j) {
+                auto line_inf = m.find_nzero_column_elem(k, k);
+                if (line_inf.first == IsZero::Zero) { return 0; }
+                if (line_inf.second != k)  {
+                    m.swap_lines(line_inf.second, k);
+                    has_sign_changed = (has_sign_changed + 1) % 2;
+                }
+                m[i][j] = (m[i][j] * m[k][k] - m[i][k] * m[k][j]) / divider;
 
+            }
+        }
+        divider = m[k][k];
+    }
+    return m[k][k] * (has_sign_changed ? -1 : 1);
+}
+
+template<typename T>
+bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    return lhs.get_size() == rhs.get_size() &&
+           std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 template<typename T>
