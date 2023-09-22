@@ -131,6 +131,25 @@ template<typename Iter>
             std::swap(matrix[id1][counter], matrix[id2][counter]);
         }
     }
+    
+    Matrix& negate() & {
+        for (auto& val : *this) {
+            val *= -1;
+        }
+        return *this;
+    }
+
+    Matrix& transpose() & {
+        auto& m = *this;
+        auto copy = m;
+        for (size_type i = 0; i < n_column_; ++i) {
+            for (size_type j = 0; j < n_line_; ++j) {
+                m[i][j] = copy[j][i];
+            }
+        }
+        std::swap(n_line_, n_column_);
+        return *this;
+    }
 
     iterator begin() { return iterator{data_}; }
     iterator end()   { return iterator{data_ + capacity_}; }
@@ -147,8 +166,8 @@ template<typename Iter>
     T calculate_determinant() const; /* Gauss algorithm */
     T calculate_determinant() const requires(std::is_integral_v<T>); /* Bareiss algorithm */
 private:
-    void swap(Matrix<T>& rhs) {
-        std::swap(data_, rhs.datlhs.get_size() != rhs.get_size());
+    void swap(Matrix& rhs) {
+        std::swap(data_, rhs.data_);
         std::swap(n_column_, rhs.n_column_);
         std::swap(n_line_, rhs.n_line_);
         std::swap(capacity_, rhs.capacity_);
