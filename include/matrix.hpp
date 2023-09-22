@@ -86,12 +86,12 @@ template<typename Iter>
         std::copy(rhs.data_, rhs.data_ + capacity_, data_);
     }
 
-    Matrix(Matrix&& rhs)
+    Matrix(Matrix&& rhs) noexcept
     : data_     { std::exchange(rhs.data_, nullptr) },
       n_column_ { std::exchange(rhs.n_column_, 0) },
       capacity_ { std::exchange(rhs.capacity_, 0) },
       n_line_   { std::exchange(rhs.n_line_, 0) }   {};
-    
+
     Matrix& operator=(const Matrix& rhs) {
         Matrix<T> tmp = rhs;
         swap(tmp);
@@ -99,7 +99,7 @@ template<typename Iter>
         return *this;
     }
 
-    Matrix& operator=(Matrix&& rhs) {
+    Matrix& operator=(Matrix&& rhs) noexcept {
         delete[] data_;
 
         data_     = std::exchange(rhs.data_, nullptr);
@@ -122,26 +122,26 @@ template<typename Iter>
         return ProxyBracket(data_ + n_column_ * index1);
     }
 
-    T determinant() const {
-        if (!is_square()) {
-           // throw MyExcepClass; // haven't written yet
-        }
-        return calculate_determinant();
-    }
-
     bool is_square() const noexcept { return n_line_ == n_column_; }
     matrix_size get_size() const noexcept { return {n_line_, n_column_}; }
-
-    iterator begin() { return iterator{data_}; }
-    iterator end()   { return iterator{data_ + capacity_}; }
-    const_iterator cbegin() const { return iterator{data_}; }
-    const_iterator cend()   const { return iterator{data_ + capacity_}; }
 
     void swap_lines(size_type id1, size_type id2) {
         static auto& matrix = *this;
         for (size_type counter = 0; counter < n_column_; ++counter) {
             std::swap(matrix[id1][counter], matrix[id2][counter]);
         }
+    }
+
+    iterator begin() { return iterator{data_}; }
+    iterator end()   { return iterator{data_ + capacity_}; }
+    const_iterator cbegin() const { return iterator{data_}; }
+    const_iterator cend()   const { return iterator{data_ + capacity_}; }
+
+    T determinant() const {
+        if (!is_square()) {
+           // throw MyExcepClass; // haven't written yet
+        }
+        return calculate_determinant();
     }
 
     T calculate_determinant() const; /* Gauss algorithm */
