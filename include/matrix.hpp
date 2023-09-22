@@ -127,7 +127,6 @@ template<typename Iter>
            // throw MyExcepClass; // haven't written yet
         }
         return calculate_determinant();
-
     }
 
     bool is_square() const noexcept { return n_line_ == n_column_; }
@@ -163,7 +162,9 @@ private:
                     return {IsZero::nZero, start_id};
                 }
             } else {
-                if (matrix[start_id][column] != 0) { return {IsZero::nZero, start_id}; }
+                if (matrix[start_id][column] != 0) {
+                    return {IsZero::nZero, start_id};
+                }
             }
         }
         return {IsZero::Zero, 0};
