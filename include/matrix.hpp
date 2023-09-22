@@ -202,14 +202,18 @@ bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
 }
 
 template<typename T>
-T Matrix<T>::calculate_determinant() const requires(std::is_floating_point_v<T>) {
+T Matrix<T>::calculate_determinant() const requires(std::is_floating_point_v<T>) { // Gauss algorithm
     auto matrix = *this;
     T determ_val = 1.0;
+    size_type has_sign_changed = 0;
     size_type id1 = 0;
     for ( ; id1 < (n_line_ - 1); ++id1) {
         auto line_inf = matrix.find_nzero_column_elem(id1, id1);
         if (line_inf.first == IsZero::Zero) { return 0; }
-        if (line_inf.second != id1)  { matrix.swap_lines(line_inf.second, id1); }
+        if (line_inf.second != id1)  {
+            matrix.swap_lines(line_inf.second, id1);
+            has_sign_changed = (has_sign_changed + 1) % 2;
+        }
         determ_val *= matrix[id1][id1];
         for (auto substract_id = id1 + 1; substract_id < n_line_; ++substract_id) {
             if ( !cmp::is_zero(matrix[id1][substract_id]) ) {
@@ -218,6 +222,7 @@ T Matrix<T>::calculate_determinant() const requires(std::is_floating_point_v<T>)
             }
         }
     }
+    if (has_sign_changed) { determ_val *= -1; }
     return determ_val *= matrix[id1][id1];
 }
 
