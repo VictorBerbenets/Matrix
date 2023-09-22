@@ -14,31 +14,27 @@
 
 namespace yLAB {
 
-namespace my_concepts {
-
 template<typename T>
 concept numeric_type = requires(T item) {
     item + item; item - item; item * item; item / item;
 };
 
-} // <--- namespace my_concepts
-
-template<my_concepts::numeric_type T>
+template<numeric_type T>
 class Matrix final {
-    struct ProxyBracket;
+    class ProxyBracket;
 
-    enum class IsZero: char { Zero = 0, nZero = 1 };
+    enum class IsZero: bool { Zero = 0, nZero = 1 };
 public:
     using size_type        = std::size_t;
     using value_type       = T;
     using pointer          = T*;
     using reference        = T&;
     using const_value_type = const value_type;
-    using const_pointer    = T* const;
+    using const_pointer    = const T*;
     using const_reference  = const T&;
 
-    using iterator       = typename iterator::MatrixIterator<T>;
-    using const_iterator = const typename iterator::MatrixIterator<T>;
+    using iterator       = MatrixIterator<T>;
+    using const_iterator = const MatrixIterator<T>;
 
     using matrix_size = std::pair<size_type, size_type>;
     using line_info   = std::pair<IsZero, size_type>;      
@@ -126,7 +122,7 @@ template<typename Iter>
     matrix_size get_size() const noexcept { return {n_line_, n_column_}; }
 
     void swap_lines(size_type id1, size_type id2) {
-        static auto& matrix = *this;
+        auto& matrix = *this;
         for (size_type counter = 0; counter < n_column_; ++counter) {
             std::swap(matrix[id1][counter], matrix[id2][counter]);
         }
@@ -174,7 +170,7 @@ private:
     }
 
     line_info find_nzero_column_elem(size_type start_line, size_type column) const {
-        static auto& matrix = *this;
+        auto& matrix = *this;
         for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
             if constexpr (std::is_floating_point_v<T>) {
                 if (!cmp::is_zero(matrix[start_id][column])) {
@@ -190,7 +186,7 @@ private:
     }
 
     void subtract_lines(size_type line1_id, size_type line2_id, value_type coeff) {
-        static auto& matrix = *this;
+        auto& matrix = *this;
         for (size_type index = line2_id; index < n_column_; ++index) {
            matrix[line1_id][index] -= matrix[line2_id][index] * coeff; 
         }

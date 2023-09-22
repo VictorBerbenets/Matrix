@@ -3,8 +3,6 @@
 
 namespace yLAB {
 
-namespace iterator {
-
 template<typename T>
 class MatrixIterator final {
 public:
@@ -69,8 +67,6 @@ template<typename T>
 MatrixIterator<T>::difference_type operator-(MatrixIterator<T> lhs, MatrixIterator<T> rhs) noexcept {
     return lhs.get_pointer() - rhs.get_pointer();
 };
-
-} // <--- namespace iterator
 
 } // <--- namespace yLAB
 
