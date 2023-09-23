@@ -60,11 +60,6 @@ MatrixIterator<T> operator+(typename MatrixIterator<T>::difference_type n, Matri
 }
 
 template<typename T>
-MatrixIterator<T> operator-(typename MatrixIterator<T>::difference_type n, MatrixIterator<T> iter) noexcept {
-    return iter - n;
-}
-
-template<typename T>
 MatrixIterator<T>::difference_type operator-(MatrixIterator<T> lhs, MatrixIterator<T> rhs) noexcept {
     return lhs.get_pointer() - rhs.get_pointer();
 };
