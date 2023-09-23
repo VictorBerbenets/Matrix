@@ -20,7 +20,6 @@ target_link_libraries(unit gtest_main gmock_main)
 target_include_directories( end2end
                             PRIVATE end2end/include
                             PRIVATE ${INCLUDE_DIR}
-                            # PRIVATE ${END2END}
                           )
 set_target_properties(
     unit end2end PROPERTIES
