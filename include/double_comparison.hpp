@@ -10,7 +10,7 @@ namespace cmp {
 static constexpr double epsilon = 1e-6;
 
 template<typename T>
-inline bool are_equal(T val1, T val2,
+bool are_equal(T val1, T val2,
                       T maxDiff    = epsilon,
                       T maxRelDiff = epsilon) requires(std::is_floating_point_v<T>) {
     T diff = std::fabs(val1 - val2);
@@ -25,7 +25,7 @@ inline bool are_equal(T val1, T val2,
 }
 
 template<typename T>
-inline bool is_zero(T expr) requires (std::is_floating_point_v<T>) {
+bool is_zero(T expr) requires (std::is_floating_point_v<T>) {
     return are_equal(expr, 0.0);
 }
 
