@@ -188,24 +188,17 @@ template<typename Iter>
     }
 
     Matrix& transpose() & {
-        auto& m = *this;
-        Matrix copy {m.ncolumn(), m.nline(), m.cbegin(), m.cend()};
-        std::cout << "COPY:\n";
-        std::cout << copy << std::endl;
+        auto& m     = *this;
+        Matrix copy = m;
+        std::swap(m.n_line_, m.n_column_);
         for (size_type i = 0; i < n_line_; ++i) {
             for (size_type j = 0; j < n_column_; ++j) {
-                //std::cout << "copy = " << copy[j][i] << std::endl;
-  //              std::cout << "m = " << m[i][j] << std::endl;
                 m[i][j] = copy[j][i];
-//                std::cout << "m = " << m[i][j] << std::endl;
             }
         }
-        std::cout << "M:\n";
-        std::cout << m << std::endl;
-        std::swap(n_line_, n_column_);
         return *this;
     }
-
+    
     iterator begin() { return iterator{data_}; }
     iterator end()   { return iterator{data_ + capacity_}; }
     const_iterator cbegin() const { return iterator{data_}; }
@@ -308,7 +301,6 @@ T Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) { // 
                     has_sign_changed = (has_sign_changed + 1) % 2;
                 }
                 m[i][j] = (m[i][j] * m[k][k] - m[i][k] * m[k][j]) / divider;
-
             }
         }
         divider = m[k][k];
