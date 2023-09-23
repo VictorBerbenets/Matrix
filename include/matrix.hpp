@@ -22,7 +22,6 @@ concept numeric_type = requires(T item) {
 template<numeric_type T>
 class Matrix final {
     class ProxyBracket;
-
     enum class IsZero: bool { Zero = 0, nZero = 1 };
 public:
     using size_type        = std::size_t;
@@ -40,7 +39,7 @@ public:
     using line_info   = std::pair<IsZero, size_type>;      
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
-    Matrix(size_type n_column, size_type n_line, Iter begin, Iter end)
+    Matrix(size_type n_line, size_type n_column, Iter begin, Iter end)
     : n_column_ {n_column},
       n_line_ {n_line},
       capacity_ {n_line * n_column},
@@ -51,7 +50,7 @@ template<typename Iter>
         std::copy(begin, end, data_);
     }
 
-    Matrix(size_type n_column, size_type n_line, std::istream& is)
+    Matrix(size_type n_line, size_type n_column, std::istream& is)
     : n_column_ {n_column},
       n_line_ {n_line},
       capacity_ {n_line * n_column},
@@ -66,7 +65,7 @@ template<typename Iter>
         }
     }
     
-    Matrix(size_type n_column, size_type n_line, const T& aggregator = {})
+    Matrix(size_type n_line, size_type n_column, const T& aggregator = {})
     : n_column_ {n_column},
       n_line_ {n_line},
       capacity_ {n_line * n_column_},
@@ -88,6 +87,10 @@ template<typename Iter>
       capacity_ { std::exchange(rhs.capacity_, 0) },
       n_line_   { std::exchange(rhs.n_line_, 0) }   {};
 
+    ~Matrix() {
+        delete[] data_;
+    }
+
     Matrix& operator=(const Matrix& rhs) {
         Matrix<T> tmp = rhs;
         swap(tmp);
@@ -106,32 +109,53 @@ template<typename Iter>
         return *this;
     }
 
-    ~Matrix() {
-        delete[] data_;
-    }
-    
     Matrix& operator+=(const Matrix& rhs) {
         if (get_size() != rhs.get_size()) {
 //            throw ...;
         }
         auto& m = *this;
-        for (size_type id = 0; id < capacity_; ++id) {
-            //m[
+        for (size_type id1 = 0; id1 < n_line_; ++id1) {
+            for (size_type id2 = 0; id2 < n_column_; ++id2) {
+                m[id1][id2] += rhs[id1][id2];
+            }
         }
+        return m;
     }
 
     Matrix& operator-=(const Matrix& rhs) {
-
+        if (get_size() != rhs.get_size()) {
+//            throw ...;
+        }
+        auto& m = *this;
+        for (size_type id1 = 0; id1 < n_line_; ++id1) {
+            for (size_type id2 = 0; id2 < n_column_; ++id2) {
+                m[id1][id2] -= rhs[id1][id2];
+            }
+        }
+        return m;
     }
 
     Matrix& operator*=(value_type coeff) {
         for (auto& val : *this) {
             val *= coeff;
         }
+        return *this;
     }
 
-    Matrix& operator/=(const Matrix& rhs) {
-
+    Matrix& operator/=(value_type coeff) {
+        if constexpr (std::is_floating_point_v<value_type>) {
+            if (cmp::is_zero(coeff)) {
+                throw std::invalid_argument{"trying to divide by 0"};
+            }
+        } else {
+            if (coeff == 0) {
+                throw std::invalid_argument{"trying to divide by 0"};
+            }
+        }
+        for (auto& val : *this) {
+            val /= coeff;
+        }
+        return *this;
     }
 
     ProxyBracket operator[](size_type index1) {
@@ -142,6 +166,8 @@ template<typename Iter>
         return ProxyBracket(data_ + n_column_ * index1);
     }
 
+    size_type nline() const noexcept { return n_line_; }
+    size_type ncolumn() const noexcept { return n_column_; }
     bool is_square() const noexcept { return n_line_ == n_column_; }
     matrix_size get_size() const noexcept { return {n_line_, n_column_}; }
 
@@ -296,6 +322,49 @@ template<typename T>
 bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     return lhs.get_size() == rhs.get_size() &&
            std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+}
+
+template<typename T>
+Matrix<T> operator+(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    auto copy = lhs;
+    return copy += rhs;
+}
+
+template<typename T>
+Matrix<T> operator-(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    auto copy = lhs;
+    return copy -= rhs;
+}
+
+template<typename T>
+Matrix<T> operator*(const Matrix<T>& lhs, typename Matrix<T>::value_type coeff) {
+    auto copy = lhs;
+    return copy *= coeff;
+}
+
+template<typename T>
+Matrix<T> operator*(typename Matrix<T>::value_type coeff, const Matrix<T>& rhs) {
+    return rhs * coeff;
+}
+
+template<typename T>
+Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) {
+    using size_type = Matrix<T>::size_type;
+
+    if (lhs.ncolumn() != rhs.nline()) {
+//        throw ...
+    }
+    Matrix<T> res {lhs.nline(), rhs.ncolumn()};
+    for (size_type id1 = 0; id1 < lhs.nline(); ++id1) {
+        for (size_type id2 = 0; id2 < rhs.ncolumn(); ++id2) {
+            T mul_result {0};
+            for (size_type id3 = 0; id3 < rhs.nline(); ++id3) {
+                mul_result += lhs[id1][id3] * rhs[id3][id2];
+            }
+            res[id1][id2] = mul_result;
+        }
+    }
+    return res;
 }
 
 template<typename T>
