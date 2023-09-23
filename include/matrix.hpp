@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <concepts>
 #include <type_traits>
+#include <initializer_list>
 #include <utility>
 
 #include "double_comparison.hpp"
@@ -72,6 +73,9 @@ template<typename Iter>
       data_ {new T[capacity_]} {
         std::fill(data_, data_ + capacity_, aggregator);
     }
+    
+    Matrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
+    : Matrix(n_line, n_column, ls.begin(), ls.end()) {}
 
     Matrix(const Matrix& rhs)
     : n_column_ {rhs.n_column_},
@@ -354,7 +358,7 @@ Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     if (lhs.ncolumn() != rhs.nline()) {
 //        throw ...
     }
-    Matrix<T> res {lhs.nline(), rhs.ncolumn()};
+    Matrix<T> res(lhs.nline(), rhs.ncolumn());
     for (size_type id1 = 0; id1 < lhs.nline(); ++id1) {
         for (size_type id2 = 0; id2 < rhs.ncolumn(); ++id2) {
             T mul_result {0};
