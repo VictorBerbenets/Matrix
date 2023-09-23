@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <utility>
 #include <algorithm>
+#include <functional>
 #include <concepts>
 #include <type_traits>
 #include <initializer_list>
@@ -117,26 +118,16 @@ template<typename Iter>
         if (get_size() != rhs.get_size()) {
 //            throw ...;
         }
-        auto& m = *this;
-        for (size_type id1 = 0; id1 < n_line_; ++id1) {
-            for (size_type id2 = 0; id2 < n_column_; ++id2) {
-                m[id1][id2] += rhs[id1][id2];
-            }
-        }
-        return m;
+        std::transform(cbegin(), cend(), rhs.cbegin(), begin(), std::plus<value_type>{});
+        return *this;
     }
 
     Matrix& operator-=(const Matrix& rhs) {
         if (get_size() != rhs.get_size()) {
 //            throw ...;
         }
-        auto& m = *this;
-        for (size_type id1 = 0; id1 < n_line_; ++id1) {
-            for (size_type id2 = 0; id2 < n_column_; ++id2) {
-                m[id1][id2] -= rhs[id1][id2];
-            }
-        }
-        return m;
+        std::transform(cbegin(), cend(), rhs.cbegin(), begin(), std::minus<value_type>{});
+        return *this;
     }
 
     Matrix& operator*=(value_type coeff) {
@@ -177,9 +168,16 @@ template<typename Iter>
 
     void swap_lines(size_type id1, size_type id2) {
         size_type offset1 = id1 * n_column_;
-        size_type offset2 = id2 * n_column_; 
+        size_type offset2 = id2 * n_column_;
         std::swap_ranges( begin() + offset1, begin() + (offset1 + n_column_),
                           begin() + offset2 );
+    }
+    
+    void swap(Matrix& rhs) {
+        std::swap(data_, rhs.data_);
+        std::swap(n_column_, rhs.n_column_);
+        std::swap(n_line_, rhs.n_line_);
+        std::swap(capacity_, rhs.capacity_);
     }
 
     Matrix& negate() & {
@@ -191,16 +189,19 @@ template<typename Iter>
 
     Matrix& transpose() & {
         auto& m = *this;
-        Matrix copy = m;
-        std::cout << m << std::endl;
-        std::cout << n_line_ << std::endl;
-        std::cout << n_column_ << std::endl;
+        Matrix copy {m.ncolumn(), m.nline(), m.cbegin(), m.cend()};
+        std::cout << "COPY:\n";
+        std::cout << copy << std::endl;
         for (size_type i = 0; i < n_line_; ++i) {
             for (size_type j = 0; j < n_column_; ++j) {
-                std::cout << "copy = " << copy[i][j] << std::endl;
-                m[j][i] = copy[i][j];
+                //std::cout << "copy = " << copy[j][i] << std::endl;
+  //              std::cout << "m = " << m[i][j] << std::endl;
+                m[i][j] = copy[j][i];
+//                std::cout << "m = " << m[i][j] << std::endl;
             }
         }
+        std::cout << "M:\n";
+        std::cout << m << std::endl;
         std::swap(n_line_, n_column_);
         return *this;
     }
@@ -210,7 +211,7 @@ template<typename Iter>
     const_iterator cbegin() const { return iterator{data_}; }
     const_iterator cend()   const { return iterator{data_ + capacity_}; }
 
-    T determinant() const {
+    value_type determinant() const {
         if (!is_square()) {
            // throw MyExcepClass; // haven't written yet
         }
@@ -220,13 +221,6 @@ template<typename Iter>
     T calculate_determinant() const; /* Gauss algorithm */
     T calculate_determinant() const requires(std::is_integral_v<T>); /* Bareiss algorithm */
 private:
-    void swap(Matrix& rhs) {
-        std::swap(data_, rhs.data_);
-        std::swap(n_column_, rhs.n_column_);
-        std::swap(n_line_, rhs.n_line_);
-        std::swap(capacity_, rhs.capacity_);
-    }
-
     line_info find_nzero_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
         for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
@@ -278,7 +272,7 @@ template<typename T>
 T Matrix<T>::calculate_determinant() const { // Gauss algorithm
     auto matrix = *this;
     value_type determ_val {1.0};
-    bool has_sign_changed {0};
+    bool has_sign_changed {false};
     size_type id1 {0};
     for ( ; id1 < (n_line_ - 1); ++id1) {
         auto line_inf = matrix.find_nzero_column_elem(id1, id1);
@@ -301,7 +295,7 @@ T Matrix<T>::calculate_determinant() const { // Gauss algorithm
 template<typename T>
 T Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) { // Bareiss algorithm
     auto m = *this;
-    bool has_sign_changed {0};
+    bool has_sign_changed {false};
     value_type divider {1};
     size_type k {0};
     for ( ; k < (n_line_ - 1); ++k) {
@@ -373,7 +367,7 @@ Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) {
 
 template<typename T>
 std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
-    using size_type = Matrix<T>::size_type;
+    using size_type = typename Matrix<T>::size_type;
 
     auto [n_line, n_column] = matrix.get_size();
     for (size_type index1 = 0; index1 < n_line; ++index1) {
