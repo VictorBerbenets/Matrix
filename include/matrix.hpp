@@ -195,8 +195,8 @@ template<typename Iter>
         return calculate_determinant();
     }
 
-    T calculate_determinant() const; /* Gauss algorithm */
-    T calculate_determinant() const requires(std::is_integral_v<T>); /* Bareiss algorithm */
+    value_type calculate_determinant() const; /* Gauss algorithm */
+    value_type calculate_determinant() const requires(std::is_integral_v<T>); /* Bareiss algorithm */
 private:
     line_info find_nzero_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
@@ -246,7 +246,7 @@ private:
 }; // <--- class Matrix
 
 template<typename T>
-T Matrix<T>::calculate_determinant() const { // Gauss algorithm
+Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algorithm
     auto matrix = *this;
     value_type determ_val {1.0};
     bool has_sign_changed {false};
@@ -270,7 +270,7 @@ T Matrix<T>::calculate_determinant() const { // Gauss algorithm
 }
 
 template<typename T>
-T Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) { // Bareiss algorithm
+Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) { // Bareiss algorithm
     auto m = *this;
     bool has_sign_changed {false};
     value_type divider {1};
