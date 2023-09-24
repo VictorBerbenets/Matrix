@@ -6,8 +6,7 @@
 
 template<typename T>
 auto get_data(std::vector<T>& data) {
-    using namespace yLAB;
-    using size_type = typename Matrix<T>::size_type;
+    using size_type = typename yLAB::Matrix<T>::size_type;
 
     std::istream_iterator<T> is {std::cin};
     size_type matrix_size = *is++;
