@@ -17,6 +17,12 @@ target_include_directories( unit
                           )
 target_link_libraries(unit gtest_main gmock_main)
 
+if (INTEGRAL_MATRIX)
+    target_compile_definitions( end2end
+                                PRIVATE
+                                INTEGRAL_MATRIX )
+endif()
+
 target_include_directories( end2end
                             PRIVATE end2end/include
                             PRIVATE ${INCLUDE_DIR}

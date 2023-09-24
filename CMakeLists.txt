@@ -11,6 +11,15 @@ add_executable(${PROJECT_NAME} ${SRC_DIR})
 target_include_directories( ${PROJECT_NAME}
                             PRIVATE
                             ${INCLUDE_DIR})
+
+option(INTEGRAL_MATRIX "what tipe of matrix to generate" OFF)
+
+if (INTEGRAL_MATRIX)
+    target_compile_definitions( ${PROJECT_NAME}
+                                PRIVATE
+                                INTEGRAL_MATRIX )
+endif()
+
 set_target_properties(
     ${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 20
