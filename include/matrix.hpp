@@ -13,6 +13,7 @@
 
 #include "double_comparison.hpp"
 #include "matrix_iterator.hpp"
+#include "exceptions.hpp"
 
 namespace yLAB {
 
@@ -47,7 +48,8 @@ template<typename Iter>
       capacity_ {n_line * n_column},
       data_ {new value_type[capacity_]} {
         if (static_cast<size_type>(std::distance(begin, end)) != capacity_) {
-            throw std::invalid_argument{"data size != matrix's size"};
+            delete [] data_;
+            throw matrixExcepts::invalidInitMatrixSize();
         }
         std::copy(begin, end, data_);
     }
@@ -77,6 +79,8 @@ template<typename Iter>
     }
 
     Matrix& operator=(const Matrix& rhs) {
+        if (size() != rhs.size()) { throw matrixExcepts::invalidMatrixAssignment(); }
+
         Matrix tmp = rhs;
         swap(tmp);
 
@@ -84,6 +88,7 @@ template<typename Iter>
     }
 
     Matrix& operator=(Matrix&& rhs) {
+        if (size() != rhs.size()) { throw matrixExcepts::invalidMatrixAssignment(); }
         delete[] data_;
 
         data_     = std::exchange(rhs.data_, nullptr);
@@ -95,16 +100,16 @@ template<typename Iter>
     }
 
     Matrix& operator+=(const Matrix& rhs) {
-        if (get_size() != rhs.get_size()) {
-//            throw ...;
+        if (size() != rhs.size()) {
+            throw matrixExcepts::invalidMatrixAddition();
         }
         std::transform(cbegin(), cend(), rhs.cbegin(), begin(), std::plus<value_type>{});
         return *this;
     }
 
     Matrix& operator-=(const Matrix& rhs) {
-        if (get_size() != rhs.get_size()) {
-//            throw ...;
+        if (size() != rhs.size()) {
+            throw matrixExcepts::invalidMatrixSubstraction();
         }
         std::transform(cbegin(), cend(), rhs.cbegin(), begin(), std::minus<value_type>{});
         return *this;
@@ -144,7 +149,7 @@ template<typename Iter>
     size_type nline() const noexcept { return n_line_; }
     size_type ncolumn() const noexcept { return n_column_; }
     bool is_square() const noexcept { return n_line_ == n_column_; }
-    matrix_size get_size() const noexcept { return {n_line_, n_column_}; }
+    matrix_size size() const noexcept { return {n_line_, n_column_}; }
 
     void swap_lines(size_type id1, size_type id2) {
         size_type offset1 = id1 * n_column_;
@@ -152,7 +157,7 @@ template<typename Iter>
         std::swap_ranges( begin() + offset1, begin() + (offset1 + n_column_),
                           begin() + offset2 );
     }
-    
+
     void swap(Matrix& rhs) {
         std::swap(data_, rhs.data_);
         std::swap(n_column_, rhs.n_column_);
@@ -178,16 +183,15 @@ template<typename Iter>
         }
         return *this;
     }
-    
+
     iterator begin() { return iterator{data_}; }
     iterator end()   { return iterator{data_ + capacity_}; }
     const_iterator cbegin() const { return iterator{data_}; }
     const_iterator cend()   const { return iterator{data_ + capacity_}; }
 
     value_type determinant() const {
-        if (!is_square()) {
-           // throw MyExcepClass; // haven't written yet
-        }
+        if (!is_square()) { throw matrixExcepts::invalidDeterminantCall(); }
+
         return calculate_determinant();
     }
 
@@ -290,7 +294,7 @@ T Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) { // 
 
 template<typename T>
 bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
-    return lhs.get_size() == rhs.get_size() &&
+    return lhs.size() == rhs.size() &&
            std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
@@ -321,9 +325,8 @@ template<typename T>
 Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     using size_type = Matrix<T>::size_type;
 
-    if (lhs.ncolumn() != rhs.nline()) {
-//        throw ...
-    }
+    if (lhs.ncolumn() != rhs.nline()) { throw matrixExcepts::invalidMatrixMulOperation(); }
+
     Matrix<T> res(lhs.nline(), rhs.ncolumn());
     for (size_type id1 = 0; id1 < lhs.nline(); ++id1) {
         for (size_type id2 = 0; id2 < rhs.ncolumn(); ++id2) {
@@ -341,7 +344,7 @@ template<typename T>
 std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
     using size_type = typename Matrix<T>::size_type;
 
-    auto [n_line, n_column] = matrix.get_size();
+    auto [n_line, n_column] = matrix.size();
     for (size_type index1 = 0; index1 < n_line; ++index1) {
         for (size_type index2 = 0; index2 < n_column; ++index2) {
             os << matrix[index1][index2] << ' ';
