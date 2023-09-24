@@ -4,28 +4,34 @@
 
 #include "matrix.hpp"
 
-int main() {
+template<typename T>
+auto get_data(std::vector<T>& data) {
     using namespace yLAB;
-    std::vector<int> vec {1, 2, 3, 4};
+    using size_type = typename Matrix<T>::size_type;
 
-    Matrix<int> m {2, 2, vec.begin(), vec.end()};
-    Matrix<double> m5 {2, 2, vec.begin(), vec.end()};
-    m5.determinant();
-    Matrix<std::size_t> m6 {2, 2, vec.begin(), vec.end()};
-    Matrix<char> m7 {2, 2, vec.begin(), vec.end()};
-    m7.determinant();
-    Matrix<int> m8 {2, 2, vec.begin(), vec.end()};
-    int x = 0;
-    m8[1][0] = x;
-    //Matrix<std::set> m9 {2, 2, vec.begin(), vec.end()};
-    m = std::move(Matrix<int> {2, 2, 1});
+    std::istream_iterator<T> is {std::cin};
+    size_type matrix_size = *is++;
+    auto data_size = matrix_size * matrix_size;
 
-    m.determinant();
-   /* m[1][1] = 100;
-    m[0][1] = 1100;
-    m[0][0] = 1010;
-    m[1][0] = 1001;
-*/
-   // std::cout << m;
+    data.reserve(data_size);
+    for (size_type counter = 0; counter < (data_size - 1); ++counter) {
+        data.push_back(*is++);
+    }
+    data.push_back(*is);
+
+    return matrix_size;
+}
+
+int main() {
+#ifdef INTEGRAL_MATRIX
+    std::vector<int> data {};
+    auto size = get_data(data);
+    yLAB::Matrix<int> m(size, size, data.cbegin(), data.cend());
+#else
+    std::vector<double> data {};
+    auto size = get_data(data);
+    yLAB::Matrix<double> m(size, size, data.cbegin(), data.cend());
+#endif
+    std::cout << m.determinant() << std::endl;
 }
 
