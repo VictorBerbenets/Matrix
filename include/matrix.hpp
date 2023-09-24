@@ -111,9 +111,9 @@ template<typename Iter>
     }
 
     Matrix& operator*=(value_type coeff) {
-        for (auto& val : *this) {
-            val *= coeff;
-        }
+        std::transform( begin(), end(), begin(), [&coeff](auto&& val) {
+                                                     return std::multiplies<value_type>{}(val, coeff);
+                                                 } );
         return *this;
     }
 
@@ -127,9 +127,9 @@ template<typename Iter>
                 throw std::invalid_argument{"trying to divide by 0"};
             }
         }
-        for (auto& val : *this) {
-            val /= coeff;
-        }
+        std::transform( begin(), end(), begin(), [&coeff](auto&& val) {
+                                                     return std::divides<value_type>{}(val, coeff);
+                                                 } );
         return *this;
     }
 
