@@ -6,6 +6,8 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <climits>
+#include <cmath>
 
 #include "matrix.hpp"
 
@@ -30,11 +32,14 @@ class generator {
 #endif
 
     static constexpr value_type MAX_MATRIX_VALUE = 5;
-    static constexpr value_type MIN_MATRIX_VALUE = -5;
+    static constexpr value_type MIN_MATRIX_VALUE = 1;
     static constexpr value_type RANDOM_MAX_COEFF = 2;
     static constexpr value_type RANDOM_MIN_COEFF = -2;
     static constexpr size_type MAX_MATRIX_SIZE   = 100;
     static constexpr size_type MIN_MATRIX_SIZE   = 1;
+
+    static constexpr value_type MAX_TYPE_SIZE = std::pow(2, sizeof(value_type) * 8) / 2 - 1;
+    static constexpr value_type MIN_TYPE_SIZE = -(MAX_TYPE_SIZE + 1);
 
     void create_source_directory() {
         using namespace std::filesystem;
@@ -75,6 +80,9 @@ class generator {
 
         auto m = upper_triangular_filling(matrix_size, counter);
         add_lines(m);
+        std::cout << "FINAL DET\n";
+        std::cout << m.determinant() << std::endl;
+        std::cout << m << std::endl;
         write_data_to_file(test_file, m);
     }
     
@@ -84,13 +92,23 @@ class generator {
         for (size_type id1 = 0; id1 < matrix_size; ++id1) {
             for (size_type id2 = id1; id2 < matrix_size; ++id2) {
                 m[id1][id2] = random_value();
+               // std::cout << "RANDOM VALUE:\n";
+                //std::cout << m[id1][id2] << std::endl;
             }
             determinant *= m[id1][id1];
+            if (std::abs(determinant) >= MAX_TYPE_SIZE) {
+                std::cout << "MAX VALUE:\n";
+                std::cout << MAX_TYPE_SIZE << std::endl;
+
+                determinant /= m[id1][id1];
+                m[id1][id1] = 1;
+            }
         }
 #if 0
         std::cout << "UPPER MATRIX: " << std::endl;
-        std::cout << m << std::endl;
 #endif
+        //std::cout << m << std::endl;
+        std::cout << "DET AFTER TRIANGULAR\n";
         std::cout << determinant << std::endl;
         std::string ans_name = "answ" + std::to_string(answ_number) + ".txt";
         std::ofstream answ_file {dirs::ans_dir + ans_name};
