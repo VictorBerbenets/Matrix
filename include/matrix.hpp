@@ -45,33 +45,18 @@ template<typename Iter>
     : n_column_ {n_column},
       n_line_ {n_line},
       capacity_ {n_line * n_column},
-      data_ {new T[capacity_]} {
+      data_ {new value_type[capacity_]} {
         if (static_cast<size_type>(std::distance(begin, end)) != capacity_) {
             throw std::invalid_argument{"data size != matrix's size"};
         }
         std::copy(begin, end, data_);
     }
 
-    Matrix(size_type n_line, size_type n_column, std::istream& is)
-    : n_column_ {n_column},
-      n_line_ {n_line},
-      capacity_ {n_line * n_column},
-      data_ {new T[capacity_]} {
-        for (size_type count = 0; count < capacity_; ++count) {
-            T tmp {};
-            is >> tmp;
-            if (!is.good()) {
-                throw std::runtime_error{"data reading error"};
-            }
-            data_[count] = tmp;
-        }
-    }
-    
     Matrix(size_type n_line, size_type n_column, const T& aggregator = {})
     : n_column_ {n_column},
       n_line_ {n_line},
       capacity_ {n_line * n_column_},
-      data_ {new T[capacity_]} {
+      data_ {new value_type[capacity_]} {
         std::fill(data_, data_ + capacity_, aggregator);
     }
     
@@ -79,12 +64,7 @@ template<typename Iter>
     : Matrix(n_line, n_column, ls.begin(), ls.end()) {}
 
     Matrix(const Matrix& rhs)
-    : n_column_ {rhs.n_column_},
-      n_line_ {rhs.n_line_},
-      capacity_ {rhs.capacity_},
-      data_ {new T[capacity_]} {
-        std::copy(rhs.data_, rhs.data_ + capacity_, data_);
-    }
+    : Matrix(rhs.n_line_, rhs.n_column_, rhs.cbegin(), rhs.cend()) {}
 
     Matrix(Matrix&& rhs)
     : data_     { std::exchange(rhs.data_, nullptr) },
@@ -97,7 +77,7 @@ template<typename Iter>
     }
 
     Matrix& operator=(const Matrix& rhs) {
-        Matrix<T> tmp = rhs;
+        Matrix tmp = rhs;
         swap(tmp);
 
         return *this;
