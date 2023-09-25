@@ -247,26 +247,26 @@ private:
 
 template<typename T>
 Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algorithm
-    auto matrix = *this;
+    auto m = *this;
     value_type determ_val {1.0};
     bool has_sign_changed {false};
     size_type id1 {0};
     for ( ; id1 < (n_line_ - 1); ++id1) {
-        auto line_inf = matrix.find_nzero_column_elem(id1, id1);
+        auto line_inf = m.find_nzero_column_elem(id1, id1);
         if (line_inf.first == IsZero::Zero) { return 0; }
         if (line_inf.second != id1)  {
-            matrix.swap_lines(line_inf.second, id1);
+            m.swap_lines(line_inf.second, id1);
             has_sign_changed = (has_sign_changed + 1) % 2;
         }
-        determ_val *= matrix[id1][id1];
+        determ_val *= m[id1][id1];
         for (auto substract_id = id1 + 1; substract_id < n_line_; ++substract_id) {
-            if ( !cmp::is_zero(matrix[id1][substract_id]) ) {
-                auto coeff = matrix[substract_id][id1] / matrix[id1][id1];
-                matrix.subtract_lines(substract_id, id1, coeff);
+            if ( !cmp::is_zero(m[substract_id][id1]) ) {
+                auto coeff = m[substract_id][id1] / m[id1][id1];
+                m.subtract_lines(substract_id, id1, coeff);
             }
         }
     }
-    return determ_val *= matrix[id1][id1] * (has_sign_changed ? -1 : 1);
+    return determ_val *= m[id1][id1] * (has_sign_changed ? -1 : 1);
 }
 
 template<typename T>
