@@ -26,7 +26,7 @@ bool are_equal(T val1, T val2,
 
 template<typename T>
 bool is_zero(T expr) requires (std::is_floating_point_v<T>) {
-    return are_equal(expr, 0.0);
+    return are_equal(expr, static_cast<T>(0));
 }
 
 } // <--- namespace cmp

@@ -198,17 +198,22 @@ template<typename Iter>
     value_type calculate_determinant() const; /* Gauss algorithm */
     value_type calculate_determinant() const requires(std::is_integral_v<T>); /* Bareiss algorithm */
 private:
-    line_info find_nzero_column_elem(size_type start_line, size_type column) const {
+    line_info find_max_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
+        std::pair<value_type, size_type> max_pair {value_type {}, 0};
         for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
-            if constexpr (std::is_floating_point_v<T>) {
-                if (!cmp::is_zero(matrix[start_id][column])) {
-                    return {IsZero::nZero, start_id};
-                }
-            } else {
-                if (matrix[start_id][column] != 0) {
-                    return {IsZero::nZero, start_id};
-                }
+            if (std::abs(matrix[start_id][column]) > std::abs(max_pair.first)) {
+                max_pair.first  =  matrix[start_id][column];
+                max_pair.second = start_id; 
+            }
+        }
+        if constexpr (std::is_floating_point_v<T>) {
+            if (!cmp::is_zero(max_pair.first)) {
+                return {IsZero::nZero, max_pair.second};
+            }
+        } else {
+            if (max_pair.first!= 0) {
+                return {IsZero::nZero, max_pair.second};
             }
         }
         return {IsZero::Zero, 0};
@@ -252,7 +257,8 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algori
     bool has_sign_changed {false};
     size_type id1 {0};
     for ( ; id1 < (n_line_ - 1); ++id1) {
-        auto line_inf = m.find_nzero_column_elem(id1, id1);
+        auto line_inf = m.find_max_column_elem(id1, id1);
+        //auto line_inf = m.find_nzero_column_elem(id1, id1);
         if (line_inf.first == IsZero::Zero) { return 0; }
         if (line_inf.second != id1)  {
             m.swap_lines(line_inf.second, id1);
@@ -280,7 +286,8 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::is_
     for ( ; k < (n_line_ - 1); ++k) {
         for (size_type i = k + 1; i < n_column_; ++i ) {
             for (size_type j = k + 1; j < n_column_; ++j) {
-                auto line_inf = m.find_nzero_column_elem(k, k);
+                auto line_inf = m.find_max_column_elem(k, k);
+                //auto line_inf = m.find_nzero_column_elem(k, k);
                 if (line_inf.first == IsZero::Zero) { return 0; }
                 if (line_inf.second != k)  {
                     m.swap_lines(line_inf.second, k);
