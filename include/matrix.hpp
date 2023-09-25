@@ -79,6 +79,7 @@ template<typename Iter>
     }
 
     Matrix& operator=(const Matrix& rhs) {
+        if (this == rhs) { return *this; };
         if (size() != rhs.size()) { throw matrixExcepts::invalidMatrixAssignment(); }
 
         Matrix tmp = rhs;
