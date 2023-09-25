@@ -23,13 +23,13 @@ auto get_data(std::vector<T>& data) {
 
 int main() {
 #ifdef INTEGRAL_MATRIX
-    std::vector<int> data {};
+    std::vector<long long> data {};
     auto size = get_data(data);
-    yLAB::Matrix<int> m(size, size, data.cbegin(), data.cend());
+    yLAB::Matrix<long long> m(size, size, data.cbegin(), data.cend());
 #else
-    std::vector<double> data {};
+    std::vector<long double> data {};
     auto size = get_data(data);
-    yLAB::Matrix<double> m(size, size, data.cbegin(), data.cend());
+    yLAB::Matrix<long double> m(size, size, data.cbegin(), data.cend());
 #endif
     std::cout << m.determinant() << std::endl;
 }
