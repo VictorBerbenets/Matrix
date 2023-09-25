@@ -271,6 +271,8 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algori
 
 template<typename T>
 Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) { // Bareiss algorithm
+    static_assert(!std::is_unsigned_v<T>, "invalid matrix type: it is impossible to calculate the determinant of unsigned numbers");
+
     auto m = *this;
     bool has_sign_changed {false};
     value_type divider {1};
