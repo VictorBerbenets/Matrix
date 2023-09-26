@@ -16,3 +16,15 @@ cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release .. -DINTEGRAL_MATRIX=<Switch>
 cd build/
 cmake --build .
 ```
+## How to run tests:
+### You can run unit tests:
+```bash
+./tests/unit
+```
+### Or you can run end2end tests:
+```bash
+bash ../tests/end2end/test_runner.sh <tests_number> <matrix_size> <max_determinant>
+```
+*tests_number* - the number of tests you want to generate 
+*matrix_size*  - dimensions of the matrices to be generated 
+*max_determinant* - the max determinant of generated matrices
