@@ -16,6 +16,10 @@ cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release .. -DINTEGRAL_MATRIX=<Switch>
 cd build/
 cmake --build .
 ```
+The programm will be waiting for input data in stdin in such way:  
+**matrix size** **elem1** **elem2** **...***  
+Number of elements should be exactly equal to product = matrix size * matrix
+size
 ## How to run tests:
 ### You can run unit tests:
 ```bash
@@ -27,4 +31,6 @@ bash ../tests/end2end/test_runner.sh <tests_number> <matrix_size> <max_determina
 ```
 **tests_number** - the number of tests you want to generate  
 **matrix_size**  - dimensions of the matrices to be generated   
-**max_determinant** - the max determinant of generated matrices   
+**max_determinant** - the max determinant of generated matrices  
+After running you can see a generated directory - tests/end2end/resources/.  
+There will be the tests themselves and the answers to them.
