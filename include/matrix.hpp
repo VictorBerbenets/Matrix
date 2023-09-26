@@ -259,7 +259,6 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algori
     size_type id1 {0};
     for ( ; id1 < (n_line_ - 1); ++id1) {
         auto line_inf = m.find_max_column_elem(id1, id1);
-        //auto line_inf = m.find_nzero_column_elem(id1, id1);
         if (line_inf.first == IsZero::Zero) { return 0; }
         if (line_inf.second != id1)  {
             m.swap_lines(line_inf.second, id1);
@@ -288,7 +287,6 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::is_
         for (size_type i = k + 1; i < n_column_; ++i ) {
             for (size_type j = k + 1; j < n_column_; ++j) {
                 auto line_inf = m.find_max_column_elem(k, k);
-                //auto line_inf = m.find_nzero_column_elem(k, k);
                 if (line_inf.first == IsZero::Zero) { return 0; }
                 if (line_inf.second != k)  {
                     m.swap_lines(line_inf.second, k);

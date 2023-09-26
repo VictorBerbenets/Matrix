@@ -12,11 +12,7 @@ auto get_data(std::vector<T>& data) {
     size_type matrix_size = *is++;
     auto data_size = matrix_size * matrix_size;
 
-    data.reserve(data_size);
-    for (size_type counter = 0; counter < (data_size - 1); ++counter) {
-        data.push_back(*is++);
-    }
-    data.push_back(*is);
+    data.insert(data.cend(), is, std::istream_iterator<T> {});
 
     return matrix_size;
 }
