@@ -10,7 +10,6 @@ auto get_data(std::vector<T>& data) {
 
     std::istream_iterator<T> is {std::cin};
     size_type matrix_size = *is++;
-    auto data_size = matrix_size * matrix_size;
 
     data.insert(data.cend(), is, std::istream_iterator<T> {});
 
