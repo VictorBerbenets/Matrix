@@ -8,7 +8,7 @@ you have two options to build this project:
 ### 1) for calculating integer matrix (set ON instead of **Switch**)
 ### 2) for calculating floating point matrix(set OFF instead of **Switch**)
 ```bash
-git@github.com:VictorBerbenets/Matrix.git
+git clone git@github.com:VictorBerbenets/Matrix.git
 cd Matrix/
 git submodule init
 git submodule update
