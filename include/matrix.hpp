@@ -220,6 +220,23 @@ private:
         return {IsZero::Zero, 0};
     }
 
+    line_info find_nzero_column_elem(size_type start_line, size_type column) const {
+        auto& matrix = *this;
+        for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
+            if constexpr (std::is_floating_point_v<T>) {
+                if (!cmp::is_zero(matrix[start_id][column])) {
+                    return {IsZero::nZero, start_id};
+                }
+            } else {
+                if (matrix[start_id][column] != 0) {
+                    return {IsZero::nZero, start_id};
+                }
+
+            }
+        }
+        return  {IsZero::Zero, 0};
+    }
+
     void subtract_lines(size_type line1_id, size_type line2_id, value_type coeff) {
         auto& matrix = *this;
         for (size_type index = line2_id; index < n_column_; ++index) {
@@ -286,7 +303,7 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::is_
     for ( ; k < (n_line_ - 1); ++k) {
         for (size_type i = k + 1; i < n_column_; ++i ) {
             for (size_type j = k + 1; j < n_column_; ++j) {
-                auto line_inf = m.find_max_column_elem(k, k);
+                auto line_inf = m.find_nzero_column_elem(k, k);
                 if (line_inf.first == IsZero::Zero) { return 0; }
                 if (line_inf.second != k)  {
                     m.swap_lines(line_inf.second, k);
