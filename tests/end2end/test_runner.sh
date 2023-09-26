@@ -73,7 +73,7 @@ then
     max_determ=$3
 else
     error="true"
-    echo -e "${red}invalid number of arguments: expected 2, got $#"
+    echo -e "${red}invalid number of arguments: expected 3, got $#"
 fi
 
 if [ $error = "false" ]

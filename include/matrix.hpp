@@ -347,6 +347,12 @@ Matrix<T> operator*(typename Matrix<T>::value_type coeff, const Matrix<T>& rhs) 
 }
 
 template<typename T>
+Matrix<T> operator/(const Matrix<T>& lhs, typename Matrix<T>::value_type coeff) {
+    auto copy = lhs;
+    return copy /= coeff;
+}
+
+template<typename T>
 Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     using size_type = Matrix<T>::size_type;
 
