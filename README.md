@@ -16,12 +16,16 @@ cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release .. -DINTEGRAL_MATRIX=<Switch>
 cd build/
 cmake --build .
 ```
+## To Run the program do  
+```bash
+./matrix
+```
 The programm will be waiting for input data in stdin in such way:  
 ```bash
 <matrix size> <elem1> <elem2> ... 
 ```
-Number of elements should be exactly equal to product = **matrix size** * **matrix**
-size.  
+Number of elements should be exactly equal to product = **matrix size** * **matrix
+size**.  
 There are two working algorithms in this project. One of them is the Gauss algorithm - using for any types except integers.  
 Another one is the Bareiss algorithm - using for only integer(not unsigned) types.
 ## How to run tests:
