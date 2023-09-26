@@ -80,7 +80,6 @@ template<typename Iter>
 
     Matrix& operator=(const Matrix& rhs) {
         if (this == rhs) { return *this; };
-        if (size() != rhs.size()) { throw matrixExcepts::invalidMatrixAssignment(); }
 
         Matrix tmp = rhs;
         swap(tmp);
@@ -89,7 +88,6 @@ template<typename Iter>
     }
 
     Matrix& operator=(Matrix&& rhs) {
-        if (size() != rhs.size()) { throw matrixExcepts::invalidMatrixAssignment(); }
         delete[] data_;
 
         data_     = std::exchange(rhs.data_, nullptr);
@@ -117,7 +115,7 @@ template<typename Iter>
     }
 
     Matrix& operator*=(value_type coeff) {
-        std::transform( begin(), end(), begin(), [&coeff](auto&& val) {
+        std::transform( cbegin(), cend(), begin(), [&coeff](auto&& val) {
                                                      return std::multiplies<value_type>{}(val, coeff);
                                                  } );
         return *this;
@@ -129,11 +127,11 @@ template<typename Iter>
                 throw std::invalid_argument{"trying to divide by 0"};
             }
         } else {
-            if (coeff == 0) {
+            if (coeff == value_type{0}) {
                 throw std::invalid_argument{"trying to divide by 0"};
             }
         }
-        std::transform( begin(), end(), begin(), [&coeff](auto&& val) {
+        std::transform( cbegin(), cend(), begin(), [&coeff](auto&& val) {
                                                      return std::divides<value_type>{}(val, coeff);
                                                  } );
         return *this;
@@ -228,7 +226,7 @@ private:
                 return {IsZero::nZero, index};
             }
         } else {
-            if (value != 0) {
+            if (value != value_type{0}) {
                 return {IsZero::nZero, index};
             }
 
