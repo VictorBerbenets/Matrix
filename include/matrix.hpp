@@ -208,33 +208,33 @@ private:
                 max_pair.second = start_id; 
             }
         }
-        if constexpr (std::is_floating_point_v<T>) {
-            if (!cmp::is_zero(max_pair.first)) {
-                return {IsZero::nZero, max_pair.second};
-            }
-        } else {
-            if (max_pair.first!= 0) {
-                return {IsZero::nZero, max_pair.second};
-            }
-        }
-        return {IsZero::Zero, 0};
+        return check_on_nzero(max_pair.first, max_pair.second); 
     }
 
     line_info find_nzero_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
         for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
-            if constexpr (std::is_floating_point_v<T>) {
-                if (!cmp::is_zero(matrix[start_id][column])) {
-                    return {IsZero::nZero, start_id};
-                }
-            } else {
-                if (matrix[start_id][column] != 0) {
-                    return {IsZero::nZero, start_id};
-                }
-
+            auto info = check_on_nzero(matrix[start_id][column], start_id); 
+            if (info.first == IsZero::nZero) {
+                return info;
             }
         }
         return  {IsZero::Zero, 0};
+    }
+
+    line_info check_on_nzero(T value, size_type index) const {
+        if constexpr (std::is_floating_point_v<T>) {
+            if (!cmp::is_zero(value)) {
+                return {IsZero::nZero, index};
+            }
+        } else {
+            if (value != 0) {
+                return {IsZero::nZero, index};
+            }
+
+        }
+        return {IsZero::Zero, 0};
+
     }
 
     void subtract_lines(size_type line1_id, size_type line2_id, value_type coeff) {
