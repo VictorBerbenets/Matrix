@@ -6,7 +6,7 @@ this program calculates the determinant of the matrix
 ## How to build
 you have two options to build this project: 
 ### 1) for calculating integer matrix (set ON instead of *Switch*)
-### 2) build the project for calculating floating point matrix(set OFF instead of *Switch*)
+### 2) for calculating floating point matrix(set OFF instead of *Switch*)
 ```bash
 git@github.com:VictorBerbenets/Matrix.git
 cd Matrix/
@@ -27,4 +27,4 @@ bash ../tests/end2end/test_runner.sh <tests_number> <matrix_size> <max_determina
 ```
 *tests_number* - the number of tests you want to generate 
 *matrix_size*  - dimensions of the matrices to be generated 
-*max_determinant* - the max determinant of generated matrices
+*max_determinant* - the max determinant of generated matrices 
