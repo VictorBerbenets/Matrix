@@ -18,8 +18,22 @@
 namespace yLAB {
 
 template<typename T>
-concept numeric_type = requires(T item) {
-    item + item; item - item; item * item; item / item;
+concept numeric_type = requires(T item1, std::size_t n) { 
+    { item1 + item1 } -> std::convertible_to<T>;
+    { item1 - item1 } -> std::convertible_to<T>;
+    { item1 * item1 } -> std::convertible_to<T>;
+    { item1 / item1 } -> std::convertible_to<T>;
+
+    { item1 == item1 } -> std::convertible_to<bool>; 
+    { item1 != item1 } -> std::convertible_to<bool>;
+    
+    item1 = item1;
+
+    { delete new T[n] };
+    { T {0} };
+    
+    std::copy_constructible<T>;
+    std::copyable<T>;
 };
 
 template<numeric_type T>
@@ -195,7 +209,7 @@ template<typename Iter>
     }
 
     value_type calculate_determinant() const; /* Gauss algorithm */
-    value_type calculate_determinant() const requires(std::is_integral_v<T>); /* Bareiss algorithm */
+    value_type calculate_determinant() const requires(std::integral<T>); /* Bareiss algorithm */
 private:
     line_info find_max_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
@@ -291,8 +305,8 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algori
 }
 
 template<typename T>
-Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::is_integral_v<T>) { // Bareiss algorithm
-    static_assert(!std::is_unsigned_v<T>, "invalid matrix type: it is impossible to calculate the determinant of unsigned numbers");
+Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::integral<T>) { // Bareiss algorithm
+    static_assert(!std::unsigned_integral<T>, "invalid matrix type: it is impossible to calculate the determinant of unsigned numbers");
 
     auto m = *this;
     bool has_sign_changed {false};
