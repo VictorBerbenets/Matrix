@@ -14,14 +14,14 @@ public:
     using const_reference   = const T&;
     using difference_type   = int;
 
-    MatrixIterator(pointer ptr = nullptr)
+    MatrixIterator(pointer ptr = nullptr) noexcept
         : ptr_ {ptr} {}
 
     MatrixIterator(const MatrixIterator& rhs) = default;
 
     ~MatrixIterator() = default;
 
-    const_pointer get_pointer() { return ptr_; }
+    const_pointer get_pointer() const noexcept { return ptr_; }
 
     MatrixIterator& operator+=(difference_type n) noexcept {
         ptr_ += n;
@@ -50,7 +50,7 @@ private:
 }; // <--- class MatrixIterator
 
 template<typename T>
-bool operator==(MatrixIterator<T> lhs, MatrixIterator<T> rhs) {
+bool operator==(MatrixIterator<T> lhs, MatrixIterator<T> rhs) noexcept {
     return lhs.get_pointer() == rhs.get_pointer();
 }
 

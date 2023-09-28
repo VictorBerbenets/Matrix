@@ -193,10 +193,10 @@ template<typename Iter>
         return *this;
     }
 
-    iterator begin() { return iterator{data_}; }
-    iterator end()   { return iterator{data_ + capacity_}; }
-    const_iterator cbegin() const { return iterator{data_}; }
-    const_iterator cend()   const { return iterator{data_ + capacity_}; }
+    iterator begin() noexcept { return iterator{data_}; }
+    iterator end()   noexcept { return iterator{data_ + capacity_}; }
+    const_iterator cbegin() const noexcept { return iterator{data_}; }
+    const_iterator cend()   const noexcept { return iterator{data_ + capacity_}; }
 
     value_type determinant() const {
         if (!is_square()) { throw matrixExcepts::invalidDeterminantCall(); }
