@@ -27,8 +27,6 @@ concept numeric_type = requires(T item1, std::size_t n) {
     { item1 == item1 } -> std::convertible_to<bool>; 
     { item1 != item1 } -> std::convertible_to<bool>;
     
-    item1 = item1;
-
     { delete new T[n] };
     { T {0} };
     
@@ -88,9 +86,7 @@ template<typename Iter>
       capacity_ { std::exchange(rhs.capacity_, 0) },
       n_line_   { std::exchange(rhs.n_line_, 0) }   {};
 
-    ~Matrix() {
-        delete[] data_;
-    }
+    ~Matrix() { delete[] data_; }
 
     Matrix& operator=(const Matrix& rhs) {
         if (this == rhs) { return *this; };
@@ -288,7 +284,7 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algori
     size_type id1 {0};
     for ( ; id1 < (n_line_ - 1); ++id1) {
         auto line_inf = m.find_max_column_elem(id1, id1);
-        if (line_inf.first == IsZero::Zero) { return 0; }
+        if (line_inf.first == IsZero::Zero) { return value_type{0}; }
         if (line_inf.second != id1)  {
             m.swap_lines(line_inf.second, id1);
             has_sign_changed = (has_sign_changed + 1) % 2;
@@ -316,7 +312,7 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::int
         for (size_type i = k + 1; i < n_column_; ++i ) {
             for (size_type j = k + 1; j < n_column_; ++j) {
                 auto line_inf = m.find_nzero_column_elem(k, k);
-                if (line_inf.first == IsZero::Zero) { return 0; }
+                if (line_inf.first == IsZero::Zero) { return value_type{0}; }
                 if (line_inf.second != k)  {
                     m.swap_lines(line_inf.second, k);
                     has_sign_changed = (has_sign_changed + 1) % 2;

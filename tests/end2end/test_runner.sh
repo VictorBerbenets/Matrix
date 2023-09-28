@@ -17,9 +17,15 @@ exe_main_file="./matrix"
 
 ##------------------------------------------------------------------------------------------##
 function run_tests {
+
+    echo -en "${white} generating tests ... ${usual}"
     generate_tests
+    printf "\n"
+    echo -en "${white} done ${usual}"
+    printf "\n"
 
     touch compare_file.txt
+    npassed_count=0
     if [ -d "${resource_dir}" ]
     then
         echo -e "${white}---end2end testing---${usual}"
@@ -35,6 +41,7 @@ function run_tests {
                     echo -e "${green}passed${usual}" 
                 else
                     echo -e "${red}failed${usual}"
+                    npassed_count=$((${npassed_count} + 1))
                 fi
                 echo -en "${blue}determinant:${usual}"
                 printf "\n"
@@ -44,6 +51,17 @@ function run_tests {
     else
         echo -e "${blue}can't generate tests. ${usual}${resource_dir} is empty"
     fi
+    echo -e "${white}-------------------------------------Total----------------------------------${usual}"
+    if [ ${npassed_count} -eq 0 ]
+    then
+        echo -e "${blue} \t\t\t\tAll tests passed! ${usual}"
+    elif [ ${npassed_count} -eq 1 ] 
+    then
+        echo -e "${red} \t\t\t\t ${npassed_count} test failed( ${usual}"
+    elif [ ${npassed_count} -gt 1 ]
+    then
+        echo -e "${red} \t\t\t\t ${npassed_count} tests failed( ${usual}"
+    fi
 
     rm compare_file.txt
 }
@@ -52,10 +70,10 @@ function run_tests {
 ##------------------------------------------------------------------------------------------##
 function generate_tests {
     def_file_name="test"
-    for ((i = 1; i <= ${tests_number}; ++i))
-    do
+    #for ((i = 1; i <= ${tests_number}; ++i))
+    #do
         ${exe_test_file} ${tests_number} ${matrix_size} ${max_determ}
-    done
+    #done
 
 }
 ##------------------------------------------------------------------------------------------##
