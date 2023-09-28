@@ -18,18 +18,18 @@
 namespace yLAB {
 
 template<typename T>
-concept numeric_type = requires(T item1, std::size_t n) { 
+concept numeric_type = requires(T item1, std::size_t n) {
     { item1 + item1 } -> std::convertible_to<T>;
     { item1 - item1 } -> std::convertible_to<T>;
     { item1 * item1 } -> std::convertible_to<T>;
     { item1 / item1 } -> std::convertible_to<T>;
 
-    { item1 == item1 } -> std::convertible_to<bool>; 
+    { item1 == item1 } -> std::convertible_to<bool>;
     { item1 != item1 } -> std::convertible_to<bool>;
-    
+
     { delete new T[n] };
     { T {0} };
-    
+
     std::copy_constructible<T>;
     std::copyable<T>;
 };
@@ -73,7 +73,7 @@ template<typename Iter>
       data_ {new value_type[capacity_]} {
         std::fill(data_, data_ + capacity_, aggregator);
     }
-    
+
     Matrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
     : Matrix(n_line, n_column, ls.begin(), ls.end()) {}
 
@@ -167,7 +167,7 @@ template<typename Iter>
                           begin() + offset2 );
     }
 
-    void swap(Matrix& rhs) {
+    void swap(Matrix& rhs) noexcept {
         std::swap(data_, rhs.data_);
         std::swap(n_column_, rhs.n_column_);
         std::swap(n_line_, rhs.n_line_);
@@ -200,7 +200,6 @@ template<typename Iter>
 
     value_type determinant() const {
         if (!is_square()) { throw matrixExcepts::invalidDeterminantCall(); }
-
         return calculate_determinant();
     }
 
@@ -213,7 +212,7 @@ private:
         for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
             if (std::abs(matrix[start_id][column]) > std::abs(max_pair.first)) {
                 max_pair.first  =  matrix[start_id][column];
-                max_pair.second = start_id; 
+                max_pair.second = start_id;
             }
         }
         return check_on_nzero(max_pair.first, max_pair.second); 
@@ -222,7 +221,7 @@ private:
     line_info find_nzero_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
         for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
-            auto info = check_on_nzero(matrix[start_id][column], start_id); 
+            auto info = check_on_nzero(matrix[start_id][column], start_id);
             if (info.first == IsZero::nZero) {
                 return info;
             }
@@ -239,16 +238,14 @@ private:
             if (value != value_type{0}) {
                 return {IsZero::nZero, index};
             }
-
         }
         return {IsZero::Zero, 0};
-
     }
 
     void subtract_lines(size_type line1_id, size_type line2_id, value_type coeff) {
         auto& matrix = *this;
         for (size_type index = line2_id; index < n_column_; ++index) {
-           matrix[line1_id][index] -= matrix[line2_id][index] * coeff; 
+           matrix[line1_id][index] -= matrix[line2_id][index] * coeff;
         }
     }
 /*----------------------------------------------------------------------------*/
@@ -260,7 +257,7 @@ private:
 
     class ProxyBracket {
     public:
-        ProxyBracket(pointer ptr)
+        ProxyBracket(pointer ptr) noexcept
             : line_ptr_ {ptr} {}
 
         reference operator[](size_type index2) {
