@@ -29,6 +29,7 @@ concept numeric_type = requires(T item1, std::size_t n) {
 
     { delete new T[n] };
     { T {0} };
+    { T {1} };
 
     std::copy_constructible<T>;
     std::copyable<T>;
@@ -132,14 +133,8 @@ template<typename Iter>
     }
 
     Matrix& operator/=(value_type coeff) {
-        if constexpr (std::is_floating_point_v<value_type>) {
-            if (cmp::is_zero(coeff)) {
-                throw std::invalid_argument{"trying to divide by 0"};
-            }
-        } else {
-            if (coeff == value_type{0}) {
-                throw std::invalid_argument{"trying to divide by 0"};
-            }
+        if (is_zero(coeff)) {
+            throw std::invalid_argument{"trying to divide by 0"};
         }
         std::transform( cbegin(), cend(), begin(), [&coeff](auto&& val) {
                                                      return std::divides<value_type>{}(val, coeff);
@@ -198,48 +193,51 @@ template<typename Iter>
     const_iterator cbegin() const noexcept { return iterator{data_}; }
     const_iterator cend()   const noexcept { return iterator{data_ + capacity_}; }
 
-    value_type determinant() const {
+    auto determinant() const {
         if (!is_square()) { throw matrixExcepts::invalidDeterminantCall(); }
-        return calculate_determinant();
-    }
 
-    value_type calculate_determinant() const; /* Gauss algorithm */
-    value_type calculate_determinant() const requires(std::integral<T>); /* Bareiss algorithm */
+        if constexpr (std::unsigned_integral<T>) {
+            Matrix<double> m {n_line_, n_column_, cbegin(), cend()};
+            return m.determinant();
+        } else if (std::signed_integral<T>) {
+            return Bareiss();
+        } else {
+            return Gauss();
+        }
+    }
+ 
+    value_type Gauss() const; /* Gauss algorithm */
+    value_type Bareiss() const; /* Bareiss algorithm */
 private:
     line_info find_max_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
         std::pair<value_type, size_type> max_pair {value_type {}, 0};
-        for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
+        size_type start_id = start_line;
+        for ( ; start_id < n_line_; ++start_id) {
             if (std::abs(matrix[start_id][column]) > std::abs(max_pair.first)) {
                 max_pair.first  =  matrix[start_id][column];
                 max_pair.second = start_id;
             }
         }
-        return check_on_nzero(max_pair.first, max_pair.second); 
+        return !is_zero(max_pair.first) ? line_info{IsZero::nZero, max_pair.second} : line_info{IsZero::Zero, 0};
     }
 
     line_info find_nzero_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
         for (size_type start_id = start_line; start_id < n_line_; ++start_id) {
-            auto info = check_on_nzero(matrix[start_id][column], start_id);
-            if (info.first == IsZero::nZero) {
-                return info;
+            if (!is_zero(matrix[start_id][column])) {
+                return {IsZero::nZero, start_id};
             }
         }
         return  {IsZero::Zero, 0};
     }
 
-    line_info check_on_nzero(T value, size_type index) const {
+    bool is_zero(value_type val) const noexcept {
         if constexpr (std::is_floating_point_v<T>) {
-            if (!cmp::is_zero(value)) {
-                return {IsZero::nZero, index};
-            }
+            return cmp::is_zero(val);
         } else {
-            if (value != value_type{0}) {
-                return {IsZero::nZero, index};
-            }
+            return val == value_type{0};
         }
-        return {IsZero::Zero, 0};
     }
 
     void subtract_lines(size_type line1_id, size_type line2_id, value_type coeff) {
@@ -274,9 +272,9 @@ private:
 }; // <--- class Matrix
 
 template<typename T>
-Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algorithm
+Matrix<T>::value_type Matrix<T>::Gauss() const { // Gauss algorithm
     auto m = *this;
-    value_type determ_val {1.0};
+    value_type determ_val {1};
     bool has_sign_changed {false};
     size_type id1 {0};
     for ( ; id1 < (n_line_ - 1); ++id1) {
@@ -294,13 +292,12 @@ Matrix<T>::value_type Matrix<T>::calculate_determinant() const { // Gauss algori
             }
         }
     }
-    return determ_val *= m[id1][id1] * (has_sign_changed ? -1 : 1);
+    auto result = determ_val *= m[id1][id1] * (has_sign_changed ? -1 : 1);
+    return is_zero(result) ? value_type{0} : result;
 }
 
 template<typename T>
-Matrix<T>::value_type Matrix<T>::calculate_determinant() const requires(std::integral<T>) { // Bareiss algorithm
-    static_assert(!std::unsigned_integral<T>, "invalid matrix type: it is impossible to calculate the determinant of unsigned numbers");
-
+Matrix<T>::value_type Matrix<T>::Bareiss() const { // Bareiss algorithm
     auto m = *this;
     bool has_sign_changed {false};
     value_type divider {1};
