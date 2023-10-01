@@ -198,17 +198,19 @@ template<typename Iter>
 
         if constexpr (std::unsigned_integral<T>) {
             Matrix<double> m {n_line_, n_column_, cbegin(), cend()};
-            return m.determinant();
+            return m.Gauss();
         } else if (std::signed_integral<T>) {
-            return Bareiss();
+            Matrix m = *this;
+            return m.Bareiss();
         } else {
-            return Gauss();
+            Matrix m = *this;
+            return m.Gauss();
         }
-    }
- 
-    value_type Gauss() const; /* Gauss algorithm */
-    value_type Bareiss() const; /* Bareiss algorithm */
+    } 
 private:
+    value_type Gauss(); /* Gauss algorithm */
+    value_type Bareiss(); /* Bareiss algorithm */
+
     line_info find_max_column_elem(size_type start_line, size_type column) const {
         auto& matrix = *this;
         std::pair<value_type, size_type> max_pair {value_type {}, 0};
@@ -272,7 +274,7 @@ private:
 }; // <--- class Matrix
 
 template<typename T>
-Matrix<T>::value_type Matrix<T>::Gauss() const { // Gauss algorithm
+Matrix<T>::value_type Matrix<T>::Gauss() { // Gauss algorithm
     auto m = *this;
     value_type determ_val {1};
     bool has_sign_changed {false};
@@ -297,7 +299,7 @@ Matrix<T>::value_type Matrix<T>::Gauss() const { // Gauss algorithm
 }
 
 template<typename T>
-Matrix<T>::value_type Matrix<T>::Bareiss() const { // Bareiss algorithm
+Matrix<T>::value_type Matrix<T>::Bareiss() { // Bareiss algorithm
     auto m = *this;
     bool has_sign_changed {false};
     value_type divider {1};
