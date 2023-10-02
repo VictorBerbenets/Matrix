@@ -198,7 +198,7 @@ template<typename Iter>
 
         if constexpr (std::unsigned_integral<T>) {
             Matrix<double> m {n_line_, n_column_, cbegin(), cend()};
-            return m.Gauss();
+            return m.determinant();
         } else if (std::signed_integral<T>) {
             Matrix m = *this;
             return m.Bareiss();
@@ -288,7 +288,7 @@ Matrix<T>::value_type Matrix<T>::Gauss() { // Gauss algorithm
         }
         determ_val *= m[id1][id1];
         for (auto substract_id = id1 + 1; substract_id < n_line_; ++substract_id) {
-            if ( !cmp::is_zero(m[substract_id][id1]) ) {
+            if (!is_zero(m[substract_id][id1])) {
                 auto coeff = m[substract_id][id1] / m[id1][id1];
                 m.subtract_lines(substract_id, id1, coeff);
             }
