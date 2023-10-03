@@ -1,6 +1,7 @@
 #ifndef DOUBLE_COMPARISON_
 #define DOUBLE_COMPARISON
 
+#include <algorithm>
 #include <cmath>
 
 namespace yLAB {

@@ -1,6 +1,8 @@
 #ifndef MATRIX_ITERATOR_
 #define MATRIX_ITERATOR_
 
+#include <iterator>
+
 namespace yLAB {
 
 template<typename T>
