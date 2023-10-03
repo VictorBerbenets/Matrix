@@ -59,13 +59,13 @@ class generator {
     value_type random_value(T min_val = MIN_MATRIX_VALUE, T max_val = MAX_MATRIX_VALUE) {
         distribution_type distr(min_val, max_val);
         return distr(generator_);
-    } 
-    
+    }
+
     size_type random_unsigned(size_type min_val = MIN_MATRIX_SIZE, size_type max_val = MAX_MATRIX_SIZE) {
         std::uniform_int_distribution<size_type> distr(min_val, max_val);
         return distr(generator_);
-    }   
- 
+    }
+
     void generate_matrix(size_type counter) {
         std::string file_name = "test" + std::to_string(counter) + ".txt";
         std::ofstream test_file {dirs::tests_dir + file_name};
@@ -75,7 +75,7 @@ class generator {
         add_lines(m);
         write_data_to_file(test_file, m);
     }
-    
+
     Matrix<T> upper_triangular_filling(size_type answ_number) {
         Matrix<T> m {matrix_size_, matrix_size_, value_type {} };
         value_type determinant {1};
@@ -103,7 +103,7 @@ class generator {
             }
         }
     }
-    
+
     void write_data_to_file(std::ofstream& test_file, const Matrix<T>& m) {
         test_file << m << std::endl;
     }
@@ -116,14 +116,13 @@ public:
 
             generator_.seed( static_cast<size_type>(std::time(nullptr)) );
     }
-    
+
     void generate_tests() {
         create_source_directory();
 
-        for (size_type counter = 1; counter <= tests_number_; ++counter) { 
+        for (size_type counter = 1; counter <= tests_number_; ++counter) {
             generate_matrix(counter);
         }
-        
     }
 
 private:

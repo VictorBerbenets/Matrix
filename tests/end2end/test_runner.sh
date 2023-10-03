@@ -30,7 +30,7 @@ function run_tests {
     then
         echo -e "${white}---end2end testing---${usual}"
         for ((i = 1; i <= ${tests_number}; ++i))
-        do      
+        do
                 tmp_check=${tests_dir}/test${i}.txt
                 ${exe_main_file} < ${tmp_check} > compare_file.txt
 
@@ -38,7 +38,7 @@ function run_tests {
                 ans_file="${answs_dir}answ${i}.txt"
                 if diff -w -n ${ans_file} compare_file.txt &>/dev/null
                 then
-                    echo -e "${green}passed${usual}" 
+                    echo -e "${green}passed${usual}"
                 else
                     echo -e "${red}failed${usual}"
                     npassed_count=$((${npassed_count} + 1))
@@ -55,7 +55,7 @@ function run_tests {
     if [ ${npassed_count} -eq 0 ]
     then
         echo -e "${blue} \t\t\t\tAll tests passed! ${usual}"
-    elif [ ${npassed_count} -eq 1 ] 
+    elif [ ${npassed_count} -eq 1 ]
     then
         echo -e "${red} \t\t\t\t ${npassed_count} test failed( ${usual}"
     elif [ ${npassed_count} -gt 1 ]
@@ -96,6 +96,6 @@ fi
 
 if [ $error = "false" ]
 then
-    run_tests 
+    run_tests
 fi
 

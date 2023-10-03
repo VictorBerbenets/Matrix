@@ -5,7 +5,7 @@
 #include <cmath>
 
 namespace yLAB {
-    
+
 namespace cmp {
 
 static constexpr double epsilon = 1e-6;

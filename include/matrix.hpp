@@ -19,7 +19,8 @@ namespace yLAB {
 
 template<typename T>
 concept numeric_type = std::copy_constructible<T> &&
-                       std::copyable<T> && requires(T item1, std::size_t n) {
+                       std::copyable<T> &&
+                       requires(T item1, std::size_t n) {
     { item1 + item1 } -> std::convertible_to<T>;
     { item1 - item1 } -> std::convertible_to<T>;
     { item1 * item1 } -> std::convertible_to<T>;
@@ -50,7 +51,7 @@ public:
     using const_iterator = const MatrixIterator<T>;
 
     using matrix_size = std::pair<size_type, size_type>;
-    using line_info   = std::pair<IsZero, size_type>;      
+    using line_info   = std::pair<IsZero, size_type>;
 /*----------------------------------------------------------------------------*/
 template<typename Iter>
     Matrix(size_type n_line, size_type n_column, Iter begin, Iter end)
@@ -204,7 +205,7 @@ template<typename Iter>
             Matrix m = *this;
             return m.Gauss();
         }
-    } 
+    }
 private:
     value_type Gauss(); /* Gauss algorithm */
     value_type Bareiss(); /* Bareiss algorithm */

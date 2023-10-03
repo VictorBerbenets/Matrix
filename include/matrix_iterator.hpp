@@ -34,7 +34,7 @@ public:
         ptr_ -= n;
         return *this;
     }
-    
+
     MatrixIterator operator+(difference_type n) const noexcept { return {ptr_ + n}; }
     MatrixIterator operator-(difference_type n) const noexcept { return {ptr_ - n}; }
 
