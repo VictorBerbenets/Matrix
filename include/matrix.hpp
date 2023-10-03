@@ -176,6 +176,9 @@ template<typename Iter>
     }
 
     Matrix& transpose() & {
+        if (is_square()) {
+            return transpose_square();
+        }
         auto& m     = *this;
         Matrix copy = m;
         std::swap(m.n_line_, m.n_column_);
@@ -246,6 +249,16 @@ private:
         for (size_type index = line2_id; index < n_column_; ++index) {
            matrix[line1_id][index] -= matrix[line2_id][index] * coeff;
         }
+    }
+
+    Matrix& transpose_square() {
+        auto& m = *this;
+        for (size_type id1 = 0; id1 < n_line_; ++id1) {
+            for (size_type id2 = id1; id2 < n_line_; ++id2) {
+                std::swap(m[id1][id2], m[id2][id1]);
+            }
+        }
+        return m;
     }
 /*----------------------------------------------------------------------------*/
 private:
