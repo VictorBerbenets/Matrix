@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iterator>
 #include <vector>
-#include <set>
 
 #include "matrix.hpp"
 
