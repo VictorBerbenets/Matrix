@@ -38,10 +38,20 @@ public:
     MatrixIterator operator+(difference_type n) const noexcept { return {ptr_ + n}; }
     MatrixIterator operator-(difference_type n) const noexcept { return {ptr_ - n}; }
 
-    MatrixIterator operator++(int n) noexcept{ ptr_++; return *this; }
-    MatrixIterator operator--(int n) noexcept { ptr_--; return *this; }
+
     MatrixIterator& operator++() noexcept { ++ptr_; return *this; }
     MatrixIterator& operator--() noexcept { --ptr_; return *this; }
+
+    MatrixIterator operator++(int n) noexcept{
+        auto tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+    MatrixIterator operator--(int n) noexcept {
+        auto tmp = *this;
+        --(*this);
+        return tmp;
+    }
 
     const_reference operator*() const noexcept { return *ptr_; }
     const_pointer operator->() const noexcept { return ptr_; }
