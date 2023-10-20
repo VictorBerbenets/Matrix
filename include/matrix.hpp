@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <functional>
 #include <concepts>
+#include <memory>
 #include <type_traits>
 #include <initializer_list>
 #include <utility>
@@ -89,7 +90,7 @@ template<typename Iter>
     ~Matrix() { delete[] data_; }
 
     Matrix& operator=(const Matrix& rhs) {
-        if (this == rhs) { return *this; };
+        if (this == std::addressof(rhs)) { return *this; };
 
         Matrix tmp = rhs;
         swap(tmp);
