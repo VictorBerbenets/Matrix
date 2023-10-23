@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 
 project(tests)
 
-enable_testing()
-add_subdirectory(googletest)
-
 aux_source_directory(./unit UNIT)
 aux_source_directory(./end2end/src END2END)
 
@@ -12,10 +9,13 @@ add_executable(unit ${UNIT})
 add_executable(end2end ${END2END})
 
 target_include_directories( unit
-                            PRIVATE googletest/
                             PRIVATE ${INCLUDE_DIR}
                           )
-target_link_libraries(unit gtest_main gmock_main)
+
+target_link_libraries( unit
+                       PRIVATE ${GTEST_LIBRARIES}
+                       PRIVATE ${CMAKE_THREAD_LIBS_INIT}
+                     )
 
 target_include_directories( end2end
                             PRIVATE end2end/include

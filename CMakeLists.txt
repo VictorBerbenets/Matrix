@@ -20,6 +20,11 @@ if (INTEGRAL_MATRIX)
                                 INTEGRAL_MATRIX )
 endif()
 
+find_package(GTest REQUIRED)
+enable_testing()
+
+find_package(Threads REQUIRED)
+
 set_target_properties(
     ${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 20
