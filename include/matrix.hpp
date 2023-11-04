@@ -15,30 +15,12 @@
 #include "double_comparison.hpp"
 #include "matrix_iterator.hpp"
 #include "exceptions.hpp"
+#include "my_concepts.hpp"
 
 namespace yLAB {
 
-template<typename T>
-concept numeric_type = std::copy_constructible<T> &&
-                       std::copyable<T> &&
-                       requires(T item1, std::size_t n) {
-    { item1 + item1 } -> std::convertible_to<T>;
-    { item1 - item1 } -> std::convertible_to<T>;
-    { item1 * item1 } -> std::convertible_to<T>;
-    { item1 / item1 } -> std::convertible_to<T>;
-
-    { item1 == item1 } -> std::convertible_to<bool>;
-    { item1 != item1 } -> std::convertible_to<bool>;
-
-    { delete new T[n] };
-    { T {0} };
-    { T {1} };
-};
-
-template<numeric_type T>
+template <my_concepts::numeric_type T>
 class Matrix final {
-    class ProxyBracket;
-    enum class IsZero: bool { Zero = 0, nZero = 1 };
 public:
     using size_type        = std::size_t;
     using value_type       = T;
@@ -47,14 +29,16 @@ public:
     using const_value_type = const value_type;
     using const_pointer    = const T*;
     using const_reference  = const T&;
-
-    using iterator       = MatrixIterator<T>;
-    using const_iterator = const MatrixIterator<T>;
+    using iterator         = MatrixIterator<T>;
+    using const_iterator   = MatrixIterator<const T>;
+private:
+    enum class IsZero: bool { Zero = 0, nZero = 1 };
+    class ProxyBracket;
 
     using matrix_size = std::pair<size_type, size_type>;
     using line_info   = std::pair<IsZero, size_type>;
-/*----------------------------------------------------------------------------*/
-template<typename Iter>
+public:
+    template <typename Iter>
     Matrix(size_type n_line, size_type n_column, Iter begin, Iter end)
     : n_column_ {n_column},
       n_line_ {n_line},
@@ -82,10 +66,10 @@ template<typename Iter>
     : Matrix(rhs.n_line_, rhs.n_column_, rhs.cbegin(), rhs.cend()) {}
 
     Matrix(Matrix&& rhs)
-    : data_     { std::exchange(rhs.data_, nullptr) },
-      n_column_ { std::exchange(rhs.n_column_, 0) },
+    : n_column_ { std::exchange(rhs.n_column_, 0) },
+      n_line_   { std::exchange(rhs.n_line_, 0) },
       capacity_ { std::exchange(rhs.capacity_, 0) },
-      n_line_   { std::exchange(rhs.n_line_, 0) }   {};
+      data_     { std::exchange(rhs.data_, nullptr) } {}
 
     ~Matrix() { delete[] data_; }
 
@@ -191,10 +175,10 @@ template<typename Iter>
         return *this;
     }
 
-    iterator begin() noexcept { return iterator{data_}; }
-    iterator end()   noexcept { return iterator{data_ + capacity_}; }
-    const_iterator cbegin() const noexcept { return iterator{data_}; }
-    const_iterator cend()   const noexcept { return iterator{data_ + capacity_}; }
+    iterator begin() noexcept { return construct_iterator(data_); }
+    iterator end()   noexcept { return construct_iterator(data_ + capacity_); }
+    const_iterator cbegin() const noexcept { return construct_iterator(data_); }
+    const_iterator cend()   const noexcept { return construct_iterator(data_ + capacity_); }
 
     auto determinant() const {
         if (!is_square()) { throw matrixExcepts::invalidDeterminantCall(); }
@@ -261,6 +245,18 @@ private:
         }
         return m;
     }
+
+    iterator construct_iterator(pointer ptr) noexcept {
+        iterator tmp;
+        tmp.ptr_ = ptr;
+        return tmp;
+    }
+
+    const_iterator construct_iterator(const_pointer ptr) const noexcept {
+        const_iterator tmp;
+        tmp.ptr_ = ptr;
+        return tmp;
+    }
 /*----------------------------------------------------------------------------*/
 private:
     size_type n_column_;
@@ -288,7 +284,7 @@ private:
 
 template<typename T>
 Matrix<T>::value_type Matrix<T>::Gauss() { // Gauss algorithm
-    auto m = *this;
+    auto& m = *this;
     value_type determ_val {1};
     bool has_sign_changed {false};
     size_type id1 {0};
@@ -313,7 +309,7 @@ Matrix<T>::value_type Matrix<T>::Gauss() { // Gauss algorithm
 
 template<typename T>
 Matrix<T>::value_type Matrix<T>::Bareiss() { // Bareiss algorithm
-    auto m = *this;
+    auto& m = *this;
     bool has_sign_changed {false};
     value_type divider {1};
     size_type k {0};
@@ -334,42 +330,42 @@ Matrix<T>::value_type Matrix<T>::Bareiss() { // Bareiss algorithm
     return m[k][k] * (has_sign_changed ? -1 : 1);
 }
 
-template<typename T>
+template <typename T>
 bool operator==(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     return lhs.size() == rhs.size() &&
            std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
-template<typename T>
+template <typename T>
 Matrix<T> operator+(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     auto copy = lhs;
     return copy += rhs;
 }
 
-template<typename T>
+template <typename T>
 Matrix<T> operator-(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     auto copy = lhs;
     return copy -= rhs;
 }
 
-template<typename T>
+template <typename T>
 Matrix<T> operator*(const Matrix<T>& lhs, typename Matrix<T>::value_type coeff) {
     auto copy = lhs;
     return copy *= coeff;
 }
 
-template<typename T>
+template <typename T>
 Matrix<T> operator*(typename Matrix<T>::value_type coeff, const Matrix<T>& rhs) {
     return rhs * coeff;
 }
 
-template<typename T>
+template <typename T>
 Matrix<T> operator/(const Matrix<T>& lhs, typename Matrix<T>::value_type coeff) {
     auto copy = lhs;
     return copy /= coeff;
 }
 
-template<typename T>
+template <typename T>
 Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     using size_type = Matrix<T>::size_type;
 
@@ -388,7 +384,7 @@ Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs) {
     return res;
 }
 
-template<typename T>
+template <typename T>
 std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
     using size_type = typename Matrix<T>::size_type;
 

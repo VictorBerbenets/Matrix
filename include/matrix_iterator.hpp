@@ -3,9 +3,11 @@
 
 #include <iterator>
 
+#include "my_concepts.hpp"
+
 namespace yLAB {
 
-template<typename T>
+template <typename T>
 class MatrixIterator final {
 public:
     using iterator_category = std::contiguous_iterator_tag;
@@ -16,14 +18,7 @@ public:
     using const_reference   = const T&;
     using difference_type   = int;
 
-    MatrixIterator(pointer ptr = nullptr) noexcept
-        : ptr_ {ptr} {}
-
-    MatrixIterator(const MatrixIterator& rhs) = default;
-
-    ~MatrixIterator() = default;
-
-    const_pointer get_pointer() const noexcept { return ptr_; }
+    MatrixIterator() = default;
 
     MatrixIterator& operator+=(difference_type n) noexcept {
         ptr_ += n;
@@ -57,24 +52,32 @@ public:
     const_pointer operator->() const noexcept { return ptr_; }
     reference operator*() noexcept { return *ptr_; }
     pointer operator->() noexcept { return ptr_; }
+
+    bool operator==(MatrixIterator rhs) noexcept {
+        return ptr_ == rhs.ptr_;
+    }
+
+    bool operator!=(MatrixIterator rhs) noexcept {
+        return !(*this == rhs);
+    }
+
+    difference_type operator-(MatrixIterator rhs) noexcept {
+        return ptr_ - rhs.ptr_;
+    }
+
+    template <my_concepts::numeric_type> friend class Matrix;
 private:
     pointer ptr_;
+
+    MatrixIterator(pointer ptr)
+    : ptr_ {ptr} {}
 }; // <--- class MatrixIterator
 
-template<typename T>
-bool operator==(MatrixIterator<T> lhs, MatrixIterator<T> rhs) noexcept {
-    return lhs.get_pointer() == rhs.get_pointer();
-}
 
-template<typename T>
+template <typename T>
 MatrixIterator<T> operator+(typename MatrixIterator<T>::difference_type n, MatrixIterator<T> iter) noexcept {
     return iter + n;
 }
-
-template<typename T>
-MatrixIterator<T>::difference_type operator-(MatrixIterator<T> lhs, MatrixIterator<T> rhs) noexcept {
-    return lhs.get_pointer() - rhs.get_pointer();
-};
 
 } // <--- namespace yLAB
 
