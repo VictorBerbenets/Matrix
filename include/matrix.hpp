@@ -38,7 +38,7 @@ private:
     using matrix_size = std::pair<size_type, size_type>;
     using line_info   = std::pair<IsZero, size_type>;
 public:
-    template <typename Iter>
+    template <std::forward_iterator Iter>
     Matrix(size_type n_line, size_type n_column, Iter begin, Iter end)
     : n_column_ {n_column},
       n_line_ {n_line},
