@@ -48,7 +48,13 @@ public:
             delete [] data_;
             throw matrixExcepts::invalidInitMatrixSize();
         }
-        std::copy(begin, end, data_);
+        try {
+            std::copy(begin, end, data_);
+        } catch (...) {
+            n_column_ = n_line_ = capacity_ = 0;
+            delete data_;
+            throw;
+        }
     }
 
     Matrix(size_type n_line, size_type n_column, const T& aggregator = {})
@@ -56,8 +62,14 @@ public:
       n_line_ {n_line},
       capacity_ {n_line * n_column_},
       data_ {new value_type[capacity_]} {
-        std::fill(data_, data_ + capacity_, aggregator);
-    }
+        try {
+            std::fill(data_, data_ + capacity_, aggregator);
+        } catch (...) {
+            n_column_ = n_line_ = capacity_ = 0;
+            delete data_;
+            throw;
+        }
+    }   
 
     Matrix(size_type n_line, size_type n_column, std::initializer_list<T> ls)
     : Matrix(n_line, n_column, ls.begin(), ls.end()) {}
@@ -83,12 +95,10 @@ public:
     }
 
     Matrix& operator=(Matrix&& rhs) {
-        delete[] data_;
-
-        data_     = std::exchange(rhs.data_, nullptr);
-        n_column_ = std::exchange(rhs.n_column_, 0);
-        capacity_ = std::exchange(rhs.capacity_, 0);
-        n_line_   = std::exchange(rhs.n_line_, 0);
+        data_     = std::exchange(rhs.data_, data_);
+        n_column_ = std::exchange(rhs.n_column_, n_column_);
+        n_line_   = std::exchange(rhs.n_line_, n_line_);
+        capacity_ = std::exchange(rhs.capacity_, capacity_);
 
         return *this;
     }
