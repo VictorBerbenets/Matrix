@@ -53,13 +53,8 @@ public:
     reference operator*() noexcept { return *ptr_; }
     pointer operator->() noexcept { return ptr_; }
 
-    bool operator==(MatrixIterator rhs) noexcept {
-        return ptr_ == rhs.ptr_;
-    }
-
-    bool operator!=(MatrixIterator rhs) noexcept {
-        return !(*this == rhs);
-    }
+    friend bool operator==(const MatrixIterator& lhs, const MatrixIterator& rhs) noexcept { return lhs.ptr_ == rhs.ptr_; }
+    friend bool operator!=(const MatrixIterator& lhs, const MatrixIterator& rhs) noexcept { return lhs.ptr_ != rhs.ptr_; }
 
     difference_type operator-(MatrixIterator rhs) noexcept {
         return ptr_ - rhs.ptr_;
