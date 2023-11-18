@@ -1,5 +1,4 @@
-#ifndef END2END_TESTING_
-#define END2END_TESTING_
+#pragma once
 
 #include <iostream>
 #include <random>
@@ -134,6 +133,4 @@ private:
 };
 
 } // <--- namespace matrix_testing
-
-#endif
 

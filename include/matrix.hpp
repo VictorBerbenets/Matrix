@@ -1,5 +1,4 @@
-#ifndef MATRIX_
-#define MATRIX_
+#pragma once
 
 #include <istream>
 #include <stdexcept>
@@ -410,4 +409,3 @@ std::ostream& operator<<(std::ostream& os, const Matrix<T>& matrix) {
 
 } // <--- namespace yLAB
 
-#endif

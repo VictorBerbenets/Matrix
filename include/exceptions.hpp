@@ -1,5 +1,4 @@
-#ifndef MATRIX_EXCEPTIONS_
-#define MATRIX_EXCEPTIONS_
+#pragma once
 
 #include <exception>
 
@@ -36,6 +35,4 @@ struct invalidDeterminantCall: public std::exception {
 };
 
 } // <--- namespace matrixExcepts
-
-#endif
 

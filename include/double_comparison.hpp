@@ -1,5 +1,4 @@
-#ifndef DOUBLE_COMPARISON_
-#define DOUBLE_COMPARISON_
+#pragma once
 
 #include <algorithm>
 #include <type_traits>
@@ -34,6 +33,4 @@ bool is_zero(T expr) requires(std::is_floating_point_v<T>) {
 } // <--- namespace cmp
 
 } // <--- namespace yLAB
-
-#endif
 

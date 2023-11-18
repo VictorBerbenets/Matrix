@@ -1,5 +1,4 @@
-#ifndef MATRIX_ITERATOR_
-#define MATRIX_ITERATOR_
+#pragma once
 
 #include <iterator>
 
@@ -75,6 +74,4 @@ MatrixIterator<T> operator+(typename MatrixIterator<T>::difference_type n, Matri
 }
 
 } // <--- namespace yLAB
-
-#endif
 
